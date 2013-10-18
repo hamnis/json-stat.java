@@ -1,9 +1,9 @@
-package stat;
+package net.hamnaberg.jsonstat;
 
 import net.hamnaberg.funclite.FunctionalList;
 import net.hamnaberg.funclite.Optional;
 import net.hamnaberg.funclite.Predicate;
-import stat.parser.JacksonStatParser;
+import net.hamnaberg.jsonstat.parser.JacksonStatParser;
 
 import java.io.IOException;
 import java.io.InputStream;

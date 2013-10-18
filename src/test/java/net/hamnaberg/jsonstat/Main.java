@@ -1,6 +1,6 @@
-package stat;
+package net.hamnaberg.jsonstat;
 
-import stat.parser.JacksonStatParser;
+import net.hamnaberg.jsonstat.parser.JacksonStatParser;
 
 import java.util.HashMap;
 import java.util.List;

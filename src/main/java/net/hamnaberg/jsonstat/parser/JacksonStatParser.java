@@ -1,12 +1,12 @@
-package stat.parser;
+package net.hamnaberg.jsonstat.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.hamnaberg.funclite.CollectionOps;
 import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.jsonstat.*;
 import org.joda.time.DateTime;
-import stat.*;
 
 import java.io.IOException;
 import java.io.InputStream;
