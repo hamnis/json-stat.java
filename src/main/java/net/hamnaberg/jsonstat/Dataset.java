@@ -47,12 +47,19 @@ public final class Dataset {
 
         int groupingIndex = product.getMaxIndex();
 
+        int lastIndex = 0;
+
         List<List<Data>> rows = new ArrayList<>();
         for (int i = 0; i < product.getMaxValue(); i++) {
             List<Data> row = new ArrayList<>();
-            for (int[] ints : asList) {
-                if (ints[groupingIndex] == i) {
-                    row.add(this.getValue(ints));
+            for (int j = lastIndex; j < asList.size(); j++) {
+                int[] coord = asList.get(j);
+                int cv = coord[groupingIndex];
+                if (cv == i) {
+                    row.add(this.getValue(coord));
+                } else if (cv == i + 1) {
+                    lastIndex = j + 1;
+                    break;
                 }
             }
             rows.add(row);
