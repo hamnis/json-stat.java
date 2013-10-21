@@ -4,6 +4,7 @@ import net.hamnaberg.funclite.CollectionOps;
 import net.hamnaberg.funclite.Function;
 import net.hamnaberg.funclite.FunctionalList;
 import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.jsonstat.util.IntCartesianProduct;
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -31,13 +32,32 @@ public final class Dataset {
         this.requiredDimensions = buildRequiredDimensionIds();
     }
 
-
     public String getId() {
         return id;
     }
 
+
     public Optional<String> getLabel() {
         return label;
+    }
+
+    public List<List<Data>> getRows() {
+        IntCartesianProduct product = this.asCartasianProduct();
+        List<int[]> asList = product.asList();
+
+        int groupingIndex = product.getMaxIndex();
+
+        List<List<Data>> rows = new ArrayList<>();
+        for (int i = 0; i < product.getMaxValue(); i++) {
+            List<Data> row = new ArrayList<>();
+            for (int[] ints : asList) {
+                if (ints[groupingIndex] == i) {
+                    row.add(this.getValue(ints));
+                }
+            }
+            rows.add(row);
+        }
+        return rows;
     }
 
     public List<Data> getSlice(Map<String, String> dimensionCategories) {
@@ -84,6 +104,10 @@ public final class Dataset {
 
     public Data getValue(int index) {
         return values.get(index);
+    }
+
+    private IntCartesianProduct asCartasianProduct() {
+        return new IntCartesianProduct(size.clone());
     }
 
     public List<Data> getValues() {

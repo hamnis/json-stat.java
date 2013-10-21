@@ -57,6 +57,10 @@ public class Main {
                 }
             });
             System.out.println("value6 = " + value6);
+
+            List<List<Data>> rows = set.getRows();
+            System.out.println("rows = " + rows);
         }
     }
+
 }
