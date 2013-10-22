@@ -111,7 +111,7 @@ public final class Table {
     public int getHeaderIndex(String id) {
         for (int i = 0; i < headers.size(); i++) {
             TableHeader h = headers.get(i);
-            if (h.getId().equals(id)) {
+            if (h.getId().equals(some(id))) {
                 return i;
             }
         }
