@@ -4,12 +4,9 @@ package net.hamnaberg.jsonstat;
 
 import net.hamnaberg.funclite.Optional;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public final class Category {
+public final class Category implements Iterable<String> {
     private final Map<String, String> labels = new LinkedHashMap<>();
     private final Map<String, Integer> indices = new LinkedHashMap<>();
     private final Map<String, List<String>> children = new LinkedHashMap<>();
@@ -34,6 +31,16 @@ public final class Category {
 
     public List<String> getChild(String id) {
         return children.containsKey(id) ? children.get(id) : Collections.<String>emptyList();
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        if (!indices.isEmpty()) {
+            return indices.keySet().iterator();
+        }
+        else {
+            return labels.keySet().iterator();
+        }
     }
 
     @Override

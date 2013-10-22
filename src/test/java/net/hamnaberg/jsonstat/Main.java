@@ -1,6 +1,8 @@
 package net.hamnaberg.jsonstat;
 
 import net.hamnaberg.jsonstat.parser.JacksonStatParser;
+import net.hamnaberg.jsonstat.table.CsvRenderer;
+import net.hamnaberg.jsonstat.table.Table;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,8 +60,10 @@ public class Main {
             });
             System.out.println("value6 = " + value6);
 
-            List<List<Data>> rows = set.getRows();
-            System.out.println("rows = " + rows);
+            Table table = Table.fromDataset(set);
+
+            String csv = table.render(new CsvRenderer());
+            System.out.println(csv);
         }
     }
 
