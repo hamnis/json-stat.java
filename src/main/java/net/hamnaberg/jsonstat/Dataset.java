@@ -58,7 +58,7 @@ public final class Dataset {
                 if (cv == i) {
                     row.add(this.getValue(coord));
                 } else if (cv == i + 1) {
-                    lastIndex = j + 1;
+                    lastIndex = j;
                     break;
                 }
             }
