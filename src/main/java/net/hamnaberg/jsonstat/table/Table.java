@@ -1,15 +1,15 @@
 package net.hamnaberg.jsonstat.table;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.FunctionalList;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.funclite.Predicate;
+import net.hamnaberg.funclite.*;
 import net.hamnaberg.jsonstat.Category;
 import net.hamnaberg.jsonstat.Data;
 import net.hamnaberg.jsonstat.Dataset;
 import net.hamnaberg.jsonstat.Dimension;
 
 import java.util.*;
+
+import static net.hamnaberg.funclite.Optional.none;
+import static net.hamnaberg.funclite.Optional.some;
 
 public final class Table {
     private Optional<String> title;
@@ -32,6 +32,7 @@ public final class Table {
         int i = 0;
         for (String s : rowDimension.getCategory()) {
             List<Data> row = rows.get(i);
+            row.add(0, new Data(rowDimension.getCategory().getLabel(s).getOrElse(s), Optional.<String>none()));
             for (Dimension dimension : dimensions) {
                 if (dimension.isConstant()) {
                     boolean added = false;
@@ -44,7 +45,6 @@ public final class Table {
                     }
                 }
             }
-            row.add(0, new Data(rowDimension.getCategory().getLabel(s).getOrElse(s), Optional.<String>none()));
             i++;
         }
 
@@ -52,23 +52,66 @@ public final class Table {
     }
 
     private static List<TableHeader> buildHeader(List<Dimension> dimensions, String rowDimension) {
+        List<List<String>> categories = new ArrayList<>();
+
         List<TableHeader> headers = new ArrayList<>();
         for (Dimension dimension : dimensions) {
             boolean isRow = rowDimension.equals(dimension.getId());
             if (dimension.isRequired() && !isRow) {
                 Category category = dimension.getCategory();
+                List<String> cats = new ArrayList<>();
                 for (String id : category) {
-                    headers.add(new TableHeader(dimension.getId(), id, category.getLabel(id).orNull()));
+                    cats.add(category.getLabel(id).getOrElse(id));
                 }
+                categories.add(cats);
             }
             else if (dimension.isConstant()) {
-                headers.add(0, new TableHeader(dimension.getId(), dimension.getCategory().iterator().next(), dimension.getLabel().orNull()));
+                headers.add(new TableHeader(CollectionOps.headOption(dimension.getCategory()), dimension.getLabel()));
             }
             if (isRow) {
-                headers.add(0, new TableHeader(dimension.getId(), dimension.getCategory().iterator().next(), dimension.getLabel().orNull()));
+                headers.add(new TableHeader(Optional.<String>none(), dimension.getLabel()));
             }
         }
+
+        List<String[]> combinations = product(categories);
+
+        for (String[] combination : combinations) {
+            String label = join(combination, " ");
+            headers.add(new TableHeader(Optional.<String>none(), some(label)));
+        }
+
         return headers;
+    }
+
+    private static <A> String join(A[] combination, String sep) {
+        StringBuilder sb = new StringBuilder();
+        for (A s : combination) {
+            if (sb.length() > 0) {
+                sb.append(sep);
+            }
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+
+    private static List<String[]> product(List<List<String>> lists)
+    {
+        List<String[]> results = new ArrayList<>();
+        product(results, lists, 0, new String[(lists.size())]);
+        return results;
+    }
+
+    private static void product(List<String[]> results, List<List<String>> lists, int depth, String[] current)
+    {
+        for (int i = 0; i < lists.get(depth).size(); i++)
+        {
+            current[depth] = lists.get(depth).get(i);
+            if (depth < lists.size() - 1)
+                product(results, lists, depth + 1, current);
+            else{
+                results.add(Arrays.copyOf(current,current.length));
+            }
+        }
     }
 
     private static Dimension findRowDimension(List<Dimension> dimensions) {

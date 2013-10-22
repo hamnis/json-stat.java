@@ -60,6 +60,11 @@ public class Main {
             });
             System.out.println("value6 = " + value6);
 
+            List<List<Data>> rows = set.getRows();
+            List<Data> row8 = rows.get(7);
+            Data data = row8.get(2);
+            System.out.println("value7 = " + data);
+
             Table table = Table.fromDataset(set);
 
             String csv = table.render(new CsvRenderer());

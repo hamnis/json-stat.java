@@ -1,37 +1,32 @@
 package net.hamnaberg.jsonstat.table;
 
-public final class TableHeader {
-    private final String dimensionId;
-    private final String id;
-    private final String label;
+import net.hamnaberg.funclite.Optional;
 
-    public TableHeader(String dimensionId, String id) {
-        this(dimensionId, id, id);
+public final class TableHeader {
+    private final Optional<String> id;
+    private final Optional<String> label;
+
+    public TableHeader(Optional<String> id) {
+        this(id, id);
     }
 
-    public TableHeader(String dimensionId, String id, String label) {
-        this.dimensionId = dimensionId;
+    public TableHeader(Optional<String> id, Optional<String> label) {
         this.id = id;
         this.label = label != null ? label : id;
     }
 
-    public String getDimensionId() {
-        return dimensionId;
-    }
-
-    public String getId() {
+    public Optional<String> getId() {
         return id;
     }
 
-    public String getLabel() {
+    public Optional<String> getLabel() {
         return label;
     }
 
     @Override
     public String toString() {
         return "TableHeader{" +
-                "dimensionId='" + dimensionId + '\'' +
-                ", id='" + id + '\'' +
+                "id='" + id + '\'' +
                 ", label='" + label + '\'' +
                 '}';
     }
