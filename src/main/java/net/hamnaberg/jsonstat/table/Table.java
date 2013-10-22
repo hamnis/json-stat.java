@@ -32,17 +32,19 @@ public final class Table {
         int i = 0;
         for (String s : rowDimension.getCategory()) {
             List<Data> row = rows.get(i);
-            row.add(0, new Data(rowDimension.getCategory().getLabel(s).getOrElse(s), Optional.<String>none()));
+            int j = 0;
+            row.add(j, new Data(rowDimension.getCategory().getLabel(s).getOrElse(s), Optional.<String>none()));
             for (Dimension dimension : dimensions) {
                 if (dimension.isConstant()) {
                     boolean added = false;
                     for (String id : dimension.getCategory()) {
-                        row.add(0, new Data(dimension.getCategory().getLabel(id).getOrElse(id), Optional.<String>none()));
+                        row.add(j, new Data(dimension.getCategory().getLabel(id).getOrElse(id), Optional.<String>none()));
                         added = true;
                     }
                     if (!added) {
-                        row.add(0, new Data(dimension.getLabel().getOrElse(dimension.getId()), Optional.<String>none()));
+                        row.add(j, new Data(dimension.getLabel().getOrElse(dimension.getId()), Optional.<String>none()));
                     }
+                    j++;
                 }
             }
             i++;
