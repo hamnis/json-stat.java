@@ -29,6 +29,7 @@ public final class Table {
         Dimension rowDimension = findRowDimension(dimensions);
         List<TableHeader> headers = buildHeader(dimensions, rowDimension.getId());
         List<List<Data>> rows = dataset.getRows();
+        //TODO: maybe this should really be part of dataset.getRows()...
         int i = 0;
         for (String s : rowDimension.getCategory()) {
             List<Data> row = rows.get(i);
@@ -54,8 +55,8 @@ public final class Table {
     }
 
     private static List<TableHeader> buildHeader(List<Dimension> dimensions, String rowDimension) {
+        //TODO: This is stupid. Fix it.
         List<List<String>> categories = new ArrayList<>();
-
         List<TableHeader> headers = new ArrayList<>();
         for (Dimension dimension : dimensions) {
             boolean isRow = rowDimension.equals(dimension.getId());
