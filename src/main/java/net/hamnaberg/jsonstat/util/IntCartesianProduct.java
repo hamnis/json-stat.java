@@ -22,15 +22,16 @@ public class IntCartesianProduct implements Iterable<int[]>, Iterator<int[]> {
 
     private int findMaxIndex(int[] lengths) {
         int max = -1;
-        int index = 0;
-        for (int length : lengths) {
+        int maxIndex = 0;
+        for (int i = 0; i < lengths.length; i++) {
+            int length = lengths[i];
             if (length > max) {
                 max = length;
-                index++;
+                maxIndex = i;
             }
         }
 
-        return index;
+        return maxIndex;
     }
 
     public boolean hasNext() {

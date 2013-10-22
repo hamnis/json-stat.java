@@ -41,16 +41,15 @@ public final class Dataset {
         return label;
     }
 
-    public List<List<Data>> getRows() {
+    public List<List<Data>> getRows(Dimension rowDimension) {
         IntCartesianProduct product = this.asCartasianProduct();
         List<int[]> asList = product.asList();
 
-        int groupingIndex = product.getMaxIndex();
-
+        int groupingIndex = rowDimension.getIndex();
         int lastIndex = 0;
 
         List<List<Data>> rows = new ArrayList<>();
-        for (int i = 0; i < product.getMaxValue(); i++) {
+        for (int i = 0; i < rowDimension.getSize(); i++) {
             List<Data> row = new ArrayList<>();
             for (int j = lastIndex; j < asList.size(); j++) {
                 int[] coord = asList.get(j);

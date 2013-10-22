@@ -31,10 +31,14 @@ public final class Table {
     }
 
     public static Table fromDataset(Dataset dataset) {
+        return fromDataset(dataset, findRowDimension(dataset));
+    }
+
+    public static Table fromDataset(Dataset dataset, Dimension rowDimension) {
         List<Dimension> dimensions = dataset.getDimensions();
-        Dimension rowDimension = findRowDimension(dataset);
+
         List<TableHeader> headers = buildHeader(dimensions, rowDimension.getId());
-        List<List<Data>> rows = dataset.getRows();
+        List<List<Data>> rows = dataset.getRows(rowDimension);
         //TODO: maybe this should really be part of dataset.getRows()...
         int i = 0;
         for (String s : rowDimension.getCategory()) {

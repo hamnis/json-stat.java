@@ -77,7 +77,7 @@ public class JacksonStatParser {
                 int currentSize = sizes.get(i).intValue();
                 if (dims.hasNonNull(id)) {
                     JsonNode dimension = dims.get(id);
-                    dimensions.put(id, parseDimension(id, currentSize, dimension));
+                    dimensions.put(id, parseDimension(i, id, currentSize, dimension));
                 }
             }
         }
@@ -85,7 +85,7 @@ public class JacksonStatParser {
         return new Dataset(entry.getKey(), label, values, updated, dimensions);
     }
 
-    private Dimension parseDimension(String id, int currentSize, JsonNode dimension) {
+    private Dimension parseDimension(int index, String id, int currentSize, JsonNode dimension) {
         Optional<String> label = Optional.none();
 
         if (dimension.has("label")) {
@@ -94,46 +94,48 @@ public class JacksonStatParser {
         JsonNode category = dimension.get("category");
 
 
-        return new Dimension(id, currentSize, label, parseCategory(category), Optional.<Role>none()); //handle roles
+        return new Dimension(index, id, currentSize, label, parseCategory(category), Optional.<Role>none()); //handle roles
     }
 
     private Category parseCategory(JsonNode category) {
         Map<String, Integer> indices = new LinkedHashMap<>();
         Map<String, String> labels = new LinkedHashMap<>();
         Map<String, List<String>> children = new LinkedHashMap<>();
-        if (category.has("index")) {
-            JsonNode index = category.get("index");
-            if (index.isArray()) {
-                int i = 0;
-                for (JsonNode id : index) {
-                    indices.put(id.asText(), i);
-                    i++;
+        if (category != null) {
+            if (category.has("index")) {
+                JsonNode index = category.get("index");
+                if (index.isArray()) {
+                    int i = 0;
+                    for (JsonNode id : index) {
+                        indices.put(id.asText(), i);
+                        i++;
+                    }
+                }
+                Iterator<Map.Entry<String, JsonNode>> fields = index.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    indices.put(entry.getKey(), entry.getValue().intValue());
                 }
             }
-            Iterator<Map.Entry<String, JsonNode>> fields = index.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                indices.put(entry.getKey(), entry.getValue().intValue());
-            }
-        }
-        if (category.has("label")) {
-            JsonNode label = category.get("label");
-            Iterator<Map.Entry<String, JsonNode>> fields = label.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                labels.put(entry.getKey(), entry.getValue().asText());
-            }
-        }
-        if (category.has("child")) {
-            JsonNode child = category.get("child");
-            Iterator<Map.Entry<String, JsonNode>> fields = child.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                List<String> c = new ArrayList<>();
-                for (JsonNode node : entry.getValue()) {
-                    c.add(node.asText());
+            if (category.has("label")) {
+                JsonNode label = category.get("label");
+                Iterator<Map.Entry<String, JsonNode>> fields = label.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    labels.put(entry.getKey(), entry.getValue().asText());
                 }
-                children.put(entry.getKey(), c);
+            }
+            if (category.has("child")) {
+                JsonNode child = category.get("child");
+                Iterator<Map.Entry<String, JsonNode>> fields = child.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    List<String> c = new ArrayList<>();
+                    for (JsonNode node : entry.getValue()) {
+                        c.add(node.asText());
+                    }
+                    children.put(entry.getKey(), c);
+                }
             }
         }
         return new Category(indices, labels, children);

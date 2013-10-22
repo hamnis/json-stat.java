@@ -9,18 +9,24 @@ import java.util.List;
 import java.util.Map;
 
 public final class Dimension {
+    private int index;
     private String id;
     private Optional<String> label;
     private int size;
     private Category category;
     private Optional<Role> role;
 
-    public Dimension(String id, int size, Optional<String> label, Category category, Optional<Role> role) {
+    public Dimension(int index, String id, int size, Optional<String> label, Category category, Optional<Role> role) {
+        this.index = index;
         this.id = id;
         this.size = size;
         this.label = label;
         this.category = category;
         this.role = role;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     public boolean isConstant() {
