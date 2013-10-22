@@ -113,7 +113,7 @@ public final class Dataset {
         return values.get(index);
     }
 
-    private IntCartesianProduct asCartasianProduct() {
+    public IntCartesianProduct asCartasianProduct() {
         return new IntCartesianProduct(size.clone());
     }
 

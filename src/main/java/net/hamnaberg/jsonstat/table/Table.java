@@ -5,11 +5,14 @@ import net.hamnaberg.jsonstat.Category;
 import net.hamnaberg.jsonstat.Data;
 import net.hamnaberg.jsonstat.Dataset;
 import net.hamnaberg.jsonstat.Dimension;
+import net.hamnaberg.jsonstat.util.CollectionUtils;
+import net.hamnaberg.jsonstat.util.IntCartesianProduct;
 
 import java.util.*;
 
 import static net.hamnaberg.funclite.Optional.none;
 import static net.hamnaberg.funclite.Optional.some;
+import static net.hamnaberg.jsonstat.util.CollectionUtils.*;
 
 public final class Table {
     private Optional<String> title;
@@ -26,7 +29,7 @@ public final class Table {
 
     public static Table fromDataset(Dataset dataset) {
         List<Dimension> dimensions = dataset.getDimensions();
-        Dimension rowDimension = findRowDimension(dimensions);
+        Dimension rowDimension = findRowDimension(dataset);
         List<TableHeader> headers = buildHeader(dimensions, rowDimension.getId());
         List<List<Data>> rows = dataset.getRows();
         //TODO: maybe this should really be part of dataset.getRows()...
@@ -76,9 +79,9 @@ public final class Table {
             }
         }
 
-        List<String[]> combinations = product(categories);
+        List<List<String>> combinations = product(categories);
 
-        for (String[] combination : combinations) {
+        for (List<String> combination : combinations) {
             String label = join(combination, " ");
             headers.add(new TableHeader(Optional.<String>none(), some(label)));
         }
@@ -86,53 +89,10 @@ public final class Table {
         return headers;
     }
 
-    private static <A> String join(A[] combination, String sep) {
-        StringBuilder sb = new StringBuilder();
-        for (A s : combination) {
-            if (sb.length() > 0) {
-                sb.append(sep);
-            }
-            sb.append(s);
-        }
-        return sb.toString();
-    }
 
-    private static List<String[]> product(List<List<String>> lists)
-    {
-        List<String[]> results = new ArrayList<>();
-        product(results, lists, 0, new String[(lists.size())]);
-        return results;
-    }
-
-    private static void product(List<String[]> results, List<List<String>> lists, int depth, String[] current)
-    {
-        for (int i = 0; i < lists.get(depth).size(); i++)
-        {
-            current[depth] = lists.get(depth).get(i);
-            if (depth < lists.size() - 1)
-                product(results, lists, depth + 1, current);
-            else{
-                results.add(Arrays.copyOf(current,current.length));
-            }
-        }
-    }
-
-    private static Dimension findRowDimension(List<Dimension> dimensions) {
-        Dimension rowDimension = null;
-
-        for (Dimension dimension : dimensions) {
-            if (dimension.isRequired()) {
-                if (rowDimension == null) {
-                    rowDimension = dimension;
-                }
-                else {
-                    if (rowDimension.getSize() < dimension.getSize()) {
-                        rowDimension = dimension;
-                    }
-                }
-            }
-        }
-        return rowDimension;
+    private static Dimension findRowDimension(Dataset ds) {
+        IntCartesianProduct p = ds.asCartasianProduct();
+        return ds.getDimensions().get(p.getMaxIndex());
     }
 
 
