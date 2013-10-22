@@ -1,18 +1,20 @@
 package net.hamnaberg.jsonstat.table;
 
-import net.hamnaberg.funclite.*;
+import net.hamnaberg.funclite.CollectionOps;
+import net.hamnaberg.funclite.Optional;
 import net.hamnaberg.jsonstat.Category;
 import net.hamnaberg.jsonstat.Data;
 import net.hamnaberg.jsonstat.Dataset;
 import net.hamnaberg.jsonstat.Dimension;
-import net.hamnaberg.jsonstat.util.CollectionUtils;
 import net.hamnaberg.jsonstat.util.IntCartesianProduct;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static net.hamnaberg.funclite.Optional.none;
 import static net.hamnaberg.funclite.Optional.some;
-import static net.hamnaberg.jsonstat.util.CollectionUtils.*;
+import static net.hamnaberg.jsonstat.util.CollectionUtils.join;
+import static net.hamnaberg.jsonstat.util.CollectionUtils.product;
 
 public final class Table {
     private Optional<String> title;
