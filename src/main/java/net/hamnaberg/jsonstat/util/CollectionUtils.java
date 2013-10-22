@@ -1,6 +1,9 @@
 package net.hamnaberg.jsonstat.util;
 
+import net.hamnaberg.funclite.CollectionOps;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class CollectionUtils {
@@ -16,22 +19,21 @@ public final class CollectionUtils {
         return sb.toString();
     }
 
-    public static <A> List<List<A>> product(List<List<A>> lists)
+    public static List<String[]> product(List<List<String>> lists)
     {
-        List<List<A>> results = new ArrayList<>();
-        product(results, lists, 0, new ArrayList<A>(lists.size()));
+        List<String[]> results = new ArrayList<>();
+        product(results, lists, 0, new String[lists.size()]);
         return results;
     }
 
-    private static <A> void product(List<List<A>> results, List<List<A>> lists, int depth, List<A> current)
+    private static void product(List<String[]> results, List<List<String>> lists, int depth, String[] current)
     {
-        for (int i = 0; i < lists.get(depth).size(); i++)
-        {
-            current.add(depth, lists.get(depth).get(i));
+        for (int i = 0; i < lists.get(depth).size(); i++) {
+            current[depth] = lists.get(depth).get(i);
             if (depth < lists.size() - 1)
                 product(results, lists, depth + 1, current);
             else{
-                results.add(current);
+                results.add(Arrays.copyOf(current, current.length));
             }
         }
     }

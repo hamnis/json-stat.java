@@ -9,6 +9,7 @@ import net.hamnaberg.jsonstat.Dimension;
 import net.hamnaberg.jsonstat.util.IntCartesianProduct;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -81,10 +82,10 @@ public final class Table {
             }
         }
 
-        List<List<String>> combinations = product(categories);
+        List<String[]> combinations = product(categories);
 
-        for (List<String> combination : combinations) {
-            String label = join(combination, " ");
+        for (String[] combination : combinations) {
+            String label = join(Arrays.asList(combination), " ");
             headers.add(new TableHeader(Optional.<String>none(), some(label)));
         }
 
