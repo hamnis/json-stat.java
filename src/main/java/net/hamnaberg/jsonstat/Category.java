@@ -2,7 +2,6 @@ package net.hamnaberg.jsonstat;
 
 
 
-import net.hamnaberg.funclite.Optional;
 
 import java.util.*;
 
@@ -26,7 +25,7 @@ public final class Category implements Iterable<String> {
     }
 
     public Optional<String> getLabel(String id) {
-        return Optional.fromNullable(labels.get(id));
+        return Optional.ofNullable(labels.get(id));
     }
 
     public List<String> getChild(String id) {

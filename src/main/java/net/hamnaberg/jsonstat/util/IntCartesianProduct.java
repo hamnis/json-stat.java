@@ -1,6 +1,6 @@
 package net.hamnaberg.jsonstat.util;
 
-import net.hamnaberg.funclite.CollectionOps;
+import com.google.common.collect.Lists;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -59,7 +59,7 @@ public class IntCartesianProduct implements Iterable<int[]>, Iterator<int[]> {
     }
 
     public List<int[]> asList() {
-        return CollectionOps.newArrayList(this);
+        return Lists.newArrayList((Iterable<int[]>) this);
     }
 
     public int getMaxIndex() {

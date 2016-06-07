@@ -13,7 +13,7 @@ public class CsvRenderer implements Renderer<String> {
         headerBuilder.append("#");
         for (int i1 = 0; i1 < headers.size(); i1++) {
             TableHeader header = headers.get(i1);
-            headerBuilder.append(header.getLabel().or(header.getId()).orNull());
+            headerBuilder.append(header.getLabel().orElseGet(() -> header.getId().orElse(null)));
             if (i1 < headers.size()-1) {
                 headerBuilder.append(",");
             }

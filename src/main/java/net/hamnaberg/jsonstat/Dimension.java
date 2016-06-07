@@ -1,12 +1,9 @@
 package net.hamnaberg.jsonstat;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+
+import java.util.*;
 
 public final class Dimension {
     private int index;
@@ -58,7 +55,7 @@ public final class Dimension {
     }
 
     public Map<String, List<String>> getCategoriesAsMap() {
-        List<String> value = CollectionOps.newArrayList(category);
+        List<String> value = Lists.newArrayList(category);
         return Collections.singletonMap(getId(), value);
     }
 

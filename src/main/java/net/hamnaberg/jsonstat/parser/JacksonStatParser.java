@@ -3,13 +3,12 @@ package net.hamnaberg.jsonstat.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
+import com.google.common.collect.Lists;
 import net.hamnaberg.jsonstat.*;
-import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.*;
 
 public class JacksonStatParser {
@@ -43,14 +42,14 @@ public class JacksonStatParser {
 
     private Dataset parseDataset(Map.Entry<String, JsonNode> entry) {
         JsonNode node = entry.getValue();
-        Optional<String> label = Optional.none();
-        Optional<DateTime> updated = Optional.none();
-        List<Data> values = CollectionOps.newArrayList();
+        Optional<String> label = Optional.empty();
+        Optional<Instant> updated = Optional.empty();
+        List<Data> values = Lists.newArrayList();
         if (node.has("label")) {
-            label = Optional.fromNullable(node.get("label").asText());
+            label = Optional.ofNullable(node.get("label").asText());
         }
         if (node.hasNonNull("updated")) {
-            updated = Optional.some(DateTime.parse(node.get("updated").asText()));
+            updated = Optional.ofNullable(Instant.parse(node.get("updated").asText()));
         }
 
         if (node.hasNonNull("value")) {
@@ -62,7 +61,7 @@ public class JacksonStatParser {
                     value = v.asText();
                 }
                 if (value != null) {
-                    values.add(new Data(value, Optional.<String>none())); //Handle status...
+                    values.add(new Data(value, Optional.empty())); //Handle status...
                 }
             }
         }
@@ -86,15 +85,15 @@ public class JacksonStatParser {
     }
 
     private Dimension parseDimension(int index, String id, int currentSize, JsonNode dimension) {
-        Optional<String> label = Optional.none();
+        Optional<String> label = Optional.empty();
 
         if (dimension.has("label")) {
-            label = Optional.fromNullable(dimension.get("label").asText());
+            label = Optional.ofNullable(dimension.get("label").asText());
         }
         JsonNode category = dimension.get("category");
 
 
-        return new Dimension(index, id, currentSize, label, parseCategory(category), Optional.<Role>none()); //handle roles
+        return new Dimension(index, id, currentSize, label, parseCategory(category), Optional.<Role>empty()); //handle roles
     }
 
     private Category parseCategory(JsonNode category) {

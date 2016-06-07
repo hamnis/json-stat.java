@@ -1,28 +1,30 @@
 package net.hamnaberg.jsonstat;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Function;
-import net.hamnaberg.funclite.FunctionalList;
-import net.hamnaberg.funclite.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import net.hamnaberg.jsonstat.util.IntCartesianProduct;
-import org.joda.time.DateTime;
 
+import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Dataset {
     private final String id;
     private final Optional<String> label;
     private final List<Data> values;
-    private final Optional<DateTime> updated;
+    private final Optional<Instant> updated;
     private final int[] size;
     private final Map<String, Dimension> dimensions = new LinkedHashMap<>();
     private final Set<String> requiredDimensions;
 
-    public Dataset(String id, Optional<String> label, List<Data> values, Optional<DateTime> updated, List<Dimension> dimensions) {
+    public Dataset(String id, Optional<String> label, List<Data> values, Optional<Instant> updated, List<Dimension> dimensions) {
         this(id, label, values, updated, toDimMap(dimensions));
     }
 
-    public Dataset(String id, Optional<String> label, List<Data> values, Optional<DateTime> updated, Map<String, Dimension> dimensions) {
+    public Dataset(String id, Optional<String> label, List<Data> values, Optional<Instant> updated, Map<String, Dimension> dimensions) {
         this.id = id;
         this.label = label;
         this.values = values;
@@ -120,16 +122,16 @@ public final class Dataset {
         return values;
     }
 
-    public Optional<DateTime> getUpdated() {
+    public Optional<Instant> getUpdated() {
         return updated;
     }
 
     public Optional<Dimension> getDimension(String id) {
-        return Optional.fromNullable(dimensions.get(id));
+        return Optional.ofNullable(dimensions.get(id));
     }
 
     public List<Dimension> getDimensions() {
-        return FunctionalList.copyOf(dimensions.values());
+        return ImmutableList.copyOf(dimensions.values());
     }
 
     public int size() {
@@ -178,16 +180,18 @@ public final class Dataset {
     }
 
     private Set<String> validateRequiredDimensions(Set<String> ids) {
-        return CollectionOps.difference(requiredDimensions, ids);
+        return Sets.difference(requiredDimensions, ids);
     }
 
     private Set<String> buildRequiredDimensionIds() {
-        return FunctionalList.copyOf(dimensions.values()).flatMap(new Function<Dimension, Iterable<String>>() {
-            @Override
-            public Iterable<String> apply(Dimension dimension) {
-                return dimension.isRequired() ? Optional.some(dimension.getId()) : Optional.<String>none();
-            }
-        }).toSet();
+
+        // TODO Document better. As far as I can tell for now, this basically filters
+        // TODO out the non required dimension ids.
+        ImmutableList<Dimension> dimensions = ImmutableList.copyOf(this.dimensions.values());
+        return dimensions.stream().flatMap(dimension -> {
+            return dimension.isRequired() ? Stream.of(dimension.getId()) : Stream.of((String) null);
+        }).collect(Collectors.toSet());
+
     }
 
     private int[] toSizes(Map<String, Dimension> dimensions) {

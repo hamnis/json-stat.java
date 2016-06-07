@@ -1,6 +1,5 @@
 package net.hamnaberg.jsonstat;
 
-import net.hamnaberg.funclite.Optional;
 import net.hamnaberg.jsonstat.parser.JacksonStatParser;
 import net.hamnaberg.jsonstat.table.CsvRenderer;
 import net.hamnaberg.jsonstat.table.Table;
@@ -9,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,7 +43,9 @@ public class Main {
 
     private static void oecd() throws IOException {
         Stat stat = new JacksonStatParser().parse(Main.class.getResourceAsStream("/oecd-canada.json"));
-        for (Dataset set: stat.getDataset("canada")) {
+        Optional<Dataset> canada = stat.getDataset("canada");
+        if (canada.isPresent()) {
+            Dataset set = canada.get();
             System.out.println("size = " + set.size());
             Data value = set.getValue(44);
             System.out.println("value = " + value);

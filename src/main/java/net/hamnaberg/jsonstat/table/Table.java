@@ -1,19 +1,15 @@
 package net.hamnaberg.jsonstat.table;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
+import com.google.common.collect.Lists;
 import net.hamnaberg.jsonstat.Category;
 import net.hamnaberg.jsonstat.Data;
 import net.hamnaberg.jsonstat.Dataset;
 import net.hamnaberg.jsonstat.Dimension;
 import net.hamnaberg.jsonstat.util.IntCartesianProduct;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.StreamSupport;
 
-import static net.hamnaberg.funclite.Optional.some;
 import static net.hamnaberg.jsonstat.util.CollectionUtils.join;
 import static net.hamnaberg.jsonstat.util.CollectionUtils.product;
 
@@ -26,7 +22,7 @@ public final class Table {
         this.title = title;
         this.headers.addAll(headers);
         for (List<Data> row : rows) {
-            this.rows.add(CollectionOps.newArrayList(row));
+            this.rows.add(Lists.newArrayList(row));
         }
     }
 
@@ -44,16 +40,16 @@ public final class Table {
         for (String s : rowDimension.getCategory()) {
             List<Data> row = rows.get(i);
             int j = 0;
-            row.add(j, new Data(rowDimension.getCategory().getLabel(s).getOrElse(s), Optional.<String>none()));
+            row.add(j, new Data(rowDimension.getCategory().getLabel(s).orElse(s), Optional.<String>empty()));
             for (Dimension dimension : dimensions) {
                 if (dimension.isConstant()) {
                     boolean added = false;
                     for (String id : dimension.getCategory()) {
-                        row.add(j, new Data(dimension.getCategory().getLabel(id).getOrElse(id), Optional.<String>none()));
+                        row.add(j, new Data(dimension.getCategory().getLabel(id).orElse(id), Optional.<String>empty()));
                         added = true;
                     }
                     if (!added) {
-                        row.add(j, new Data(dimension.getLabel().getOrElse(dimension.getId()), Optional.<String>none()));
+                        row.add(j, new Data(dimension.getLabel().orElse(dimension.getId()), Optional.<String>empty()));
                     }
                     j++;
                 }
@@ -74,15 +70,17 @@ public final class Table {
                 Category category = dimension.getCategory();
                 List<String> cats = new ArrayList<>();
                 for (String id : category) {
-                    cats.add(category.getLabel(id).getOrElse(id));
+                    cats.add(category.getLabel(id).orElse(id));
                 }
                 categories.add(cats);
             }
             else if (dimension.isConstant()) {
-                headers.add(new TableHeader(CollectionOps.headOption(dimension.getCategory()), dimension.getLabel()));
+                Optional<String> dimensionId = StreamSupport.stream(dimension.getCategory().spliterator(), false)
+                        .findFirst();
+                headers.add(new TableHeader(dimensionId, dimension.getLabel()));
             }
             if (isRow) {
-                headers.add(new TableHeader(Optional.<String>none(), dimension.getLabel()));
+                headers.add(new TableHeader(Optional.<String>empty(), dimension.getLabel()));
             }
         }
 
@@ -90,7 +88,7 @@ public final class Table {
 
         for (String[] combination : combinations) {
             String label = join(Arrays.asList(combination), " ");
-            headers.add(new TableHeader(Optional.<String>none(), some(label)));
+            headers.add(new TableHeader(Optional.<String>empty(), Optional.of(label)));
         }
 
         return headers;
@@ -118,7 +116,7 @@ public final class Table {
     public int getHeaderIndex(String id) {
         for (int i = 0; i < headers.size(); i++) {
             TableHeader h = headers.get(i);
-            if (h.getId().equals(some(id))) {
+            if (h.getId().equals(Optional.of(id))) {
                 return i;
             }
         }

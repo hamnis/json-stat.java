@@ -1,6 +1,5 @@
 package net.hamnaberg.jsonstat.util;
 
-import net.hamnaberg.funclite.CollectionOps;
 
 import java.util.ArrayList;
 import java.util.Arrays;

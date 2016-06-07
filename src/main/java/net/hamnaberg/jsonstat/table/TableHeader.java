@@ -1,6 +1,7 @@
 package net.hamnaberg.jsonstat.table;
 
-import net.hamnaberg.funclite.Optional;
+
+import java.util.Optional;
 
 public final class TableHeader {
     private final Optional<String> id;

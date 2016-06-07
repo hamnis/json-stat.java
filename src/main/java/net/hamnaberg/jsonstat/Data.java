@@ -1,7 +1,7 @@
 package net.hamnaberg.jsonstat;
 
 
-import net.hamnaberg.funclite.Optional;
+import java.util.Optional;
 
 /**
  * Created with IntelliJ IDEA.

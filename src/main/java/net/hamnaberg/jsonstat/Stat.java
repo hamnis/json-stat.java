@@ -1,8 +1,5 @@
 package net.hamnaberg.jsonstat;
 
-import net.hamnaberg.funclite.FunctionalList;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.funclite.Predicate;
 import net.hamnaberg.jsonstat.parser.JacksonStatParser;
 
 import java.io.IOException;
@@ -10,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 public final class Stat {
@@ -24,16 +22,13 @@ public final class Stat {
     }
 
     public Optional<Dataset> getDataset(final String id) {
-        return FunctionalList.create(datasets).find(new Predicate<Dataset>() {
-            @Override
-            public boolean apply(Dataset dataset) {
-                return dataset.getId().equals(id);
-            }
-        });
+
+        return datasets.stream().filter(dataset -> dataset.getId().equals(id)).findFirst();
+
     }
 
     public Optional<Dataset> getDataset(final int index) {
-        return index < datasets.size() ? Optional.some(getDatasets().get(index)) : Optional.<Dataset>none();
+        return index < datasets.size() ? Optional.of(getDatasets().get(index)) : Optional.<Dataset>empty();
     }
 
     public static Stat parse(InputStream stream) throws IOException {
