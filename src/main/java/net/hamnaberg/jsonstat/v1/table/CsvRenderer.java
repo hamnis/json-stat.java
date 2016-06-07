@@ -1,6 +1,6 @@
-package net.hamnaberg.jsonstat.table;
+package net.hamnaberg.jsonstat.v1.table;
 
-import net.hamnaberg.jsonstat.Data;
+import net.hamnaberg.jsonstat.v1.Data;
 
 import java.util.List;
 

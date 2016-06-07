@@ -1,6 +1,6 @@
-package net.hamnaberg.jsonstat;
+package net.hamnaberg.jsonstat.v1;
 
-import net.hamnaberg.jsonstat.parser.JacksonStatParser;
+import net.hamnaberg.jsonstat.v1.parser.JacksonStatParser;
 
 import java.io.IOException;
 import java.io.InputStream;

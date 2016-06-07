@@ -1,13 +1,11 @@
-package net.hamnaberg.jsonstat;
+package net.hamnaberg.jsonstat.v1;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import net.hamnaberg.jsonstat.util.IntCartesianProduct;
+import net.hamnaberg.jsonstat.v1.util.IntCartesianProduct;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

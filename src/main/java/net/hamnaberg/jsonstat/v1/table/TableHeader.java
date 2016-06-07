@@ -1,4 +1,4 @@
-package net.hamnaberg.jsonstat.table;
+package net.hamnaberg.jsonstat.v1.table;
 
 
 import java.util.Optional;

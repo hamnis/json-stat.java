@@ -1,8 +1,8 @@
-package net.hamnaberg.jsonstat;
+package net.hamnaberg.jsonstat.v1;
 
-import net.hamnaberg.jsonstat.parser.JacksonStatParser;
-import net.hamnaberg.jsonstat.table.CsvRenderer;
-import net.hamnaberg.jsonstat.table.Table;
+import net.hamnaberg.jsonstat.v1.parser.JacksonStatParser;
+import net.hamnaberg.jsonstat.v1.table.CsvRenderer;
+import net.hamnaberg.jsonstat.v1.table.Table;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        //oecd();
+        oecd();
         if (args.length == 1) {
             Stat stat = new JacksonStatParser().parse(new FileInputStream(args[0]));
             List<Dataset> datasets = stat.getDatasets();

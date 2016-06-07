@@ -1,17 +1,17 @@
-package net.hamnaberg.jsonstat.table;
+package net.hamnaberg.jsonstat.v1.table;
 
 import com.google.common.collect.Lists;
-import net.hamnaberg.jsonstat.Category;
-import net.hamnaberg.jsonstat.Data;
-import net.hamnaberg.jsonstat.Dataset;
-import net.hamnaberg.jsonstat.Dimension;
-import net.hamnaberg.jsonstat.util.IntCartesianProduct;
+import net.hamnaberg.jsonstat.v1.Category;
+import net.hamnaberg.jsonstat.v1.Data;
+import net.hamnaberg.jsonstat.v1.Dataset;
+import net.hamnaberg.jsonstat.v1.Dimension;
+import net.hamnaberg.jsonstat.v1.util.IntCartesianProduct;
 
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-import static net.hamnaberg.jsonstat.util.CollectionUtils.join;
-import static net.hamnaberg.jsonstat.util.CollectionUtils.product;
+import static net.hamnaberg.jsonstat.v1.util.CollectionUtils.join;
+import static net.hamnaberg.jsonstat.v1.util.CollectionUtils.product;
 
 public final class Table {
     private Optional<String> title;

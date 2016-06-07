@@ -1,10 +1,10 @@
-package net.hamnaberg.jsonstat.parser;
+package net.hamnaberg.jsonstat.v1.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
-import net.hamnaberg.jsonstat.*;
+import net.hamnaberg.jsonstat.v1.*;
 
 import java.io.IOException;
 import java.io.InputStream;

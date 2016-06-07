@@ -1,4 +1,4 @@
-package net.hamnaberg.jsonstat;
+package net.hamnaberg.jsonstat.v1;
 
 
 import com.google.common.collect.Lists;
