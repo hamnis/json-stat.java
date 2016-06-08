@@ -1,5 +1,6 @@
 package net.hamnaberg.jsonstat.v2;
 
+import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Multimap;
 import net.hamnaberg.jsonstat.JsonStat;
 
