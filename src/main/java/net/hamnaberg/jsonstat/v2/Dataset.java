@@ -2,6 +2,7 @@ package net.hamnaberg.jsonstat.v2;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.time.Instant;
@@ -31,13 +32,17 @@ public class Dataset extends JsonStat {
     // https://json-stat.org/format/#value
     private Object value;
 
-    public Dataset(ImmutableSet<String> id, ImmutableList<Integer> size) {
+    protected Dataset(ImmutableSet<String> id, ImmutableList<Integer> size) {
         super(Version.TWO, Class.DATASET);
 
         checkArgument(id.size() == size.size(), "size and property sizes do not match");
 
         this.id = id;
         this.size = size;
+    }
+
+    public static Builder create() {
+        return new Builder();
     }
 
     public ImmutableSet<String> getId() {
@@ -70,5 +75,59 @@ public class Dataset extends JsonStat {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public static class Builder {
+
+        private String label;
+        private String source;
+        private Instant update;
+        private ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
+
+        private Builder() {
+            // Should use Dataset.create()
+        }
+
+        public Builder withLabel(final String label) {
+            this.label = label;
+            return this;
+        }
+
+        public Builder withSource(final String source) {
+            this.source = source;
+            return this;
+        }
+
+        public Builder updatedAt(final Instant instant) {
+            this.update = instant;
+            return this;
+        }
+
+
+        public Builder withDimension(Dimension.Builder dimension) {
+            // TODO: Should throw error if duplicate?
+            // TODO: How to access the dimension id?
+            dimensionBuilders.add(dimension);
+            return this;
+        }
+
+        public Dataset build() {
+
+            ImmutableSet<Dimension> dimensions = ImmutableSet.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::build)
+            );
+
+            ImmutableSet<String> ids = ImmutableSet.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::getId)
+            );
+
+            // TODO Make sure this is okay.
+            ImmutableList<Integer> sizes = ImmutableList.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::size)
+            );
+
+            Dataset dataset = new Dataset(ids, sizes);
+            return dataset;
+        }
     }
 }

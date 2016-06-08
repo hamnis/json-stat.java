@@ -1,6 +1,7 @@
 package net.hamnaberg.jsonstat.v2;
 
-import com.google.common.collect.ForwardingMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import net.hamnaberg.jsonstat.JsonStat;
 
@@ -13,11 +14,17 @@ import java.util.Optional;
  */
 public class Dimension extends JsonStat {
 
+    private final Category category;
     // https://json-stat.org/format/#label
     private String label;
 
-    public Dimension() {
+    public Dimension(Category category) {
         super(Version.TWO, Class.DIMENSION);
+        this.category = category;
+    }
+
+    public static Builder create(final String name) {
+        return new Builder(name);
     }
 
     public Optional<String> getLabel() {
@@ -27,6 +34,10 @@ public class Dimension extends JsonStat {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    enum Roles {
+        TIME, GEO, METRIC
     }
 
     // https://json-stat.org/format/#category
@@ -95,5 +106,59 @@ public class Dimension extends JsonStat {
         }
     }
 
+    public static class Builder {
 
+        private final String id;
+        private Roles role;
+
+        private Builder(String id) {
+            this.id = id;
+            // Use Dimension.create()
+        }
+
+        protected String getId() {
+            return id;
+        }
+
+        protected Integer size() {
+            // TODO
+            return 1;
+        }
+
+        public Builder withRole(final Roles role) {
+            this.role = role;
+            return this;
+        }
+
+        public Builder withCategories(ImmutableList<String> categories) {
+            // TODO
+            return this;
+        }
+
+        public Builder withLabels(ImmutableList<String> categories) {
+            // TODO
+            return this;
+        }
+
+        public Builder withIndexedLabels(ImmutableMap<String, String> indexedLabels) {
+            // TODO
+            return this;
+        }
+
+        public Builder withGeoRole() {
+            return this.withRole(Roles.GEO);
+        }
+
+        public Builder withMetricRole() {
+            return this.withRole(Roles.METRIC);
+        }
+
+        public Builder withTimeRole() {
+            return this.withRole(Roles.TIME);
+        }
+
+        public Dimension build() {
+            return new Dimension(null);
+        }
+    }
 }

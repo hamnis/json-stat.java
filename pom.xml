@@ -46,6 +46,12 @@
             <version>LATEST</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.revinate</groupId>
+            <artifactId>assertj-json</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
 
     </dependencies>
     <properties>
