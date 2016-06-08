@@ -2,6 +2,8 @@ package net.hamnaberg.jsonstat.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import net.hamnaberg.jsonstat.JsonStatModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -15,7 +17,8 @@ public class DimensionTest {
     @BeforeMethod
     public void setUp() throws Exception {
         // TODO
-        mapper.registerModule(new SimpleModule());
+        mapper.registerModule(new JsonStatModule());
+        mapper.registerModule(new Jdk8Module());
     }
 
     @Test
