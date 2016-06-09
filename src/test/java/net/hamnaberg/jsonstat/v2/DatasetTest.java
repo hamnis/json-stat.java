@@ -13,6 +13,8 @@ import org.testng.annotations.Test;
 
 import java.time.Instant;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Created by hadrien on 07/06/16.
  */
@@ -54,6 +56,50 @@ public class DatasetTest {
 
     }
 
+    @Test(
+            expectedExceptions = DuplicateDimensionException.class,
+            expectedExceptionsMessageRegExp = ".*duplicatedimension.*"
+    )
+    public void testFailIfDuplicateDimension() throws Exception {
+
+        Dataset.create("Test dataset")
+                .withDimension(Dimension.create("duplicatedimension"))
+                .withDimension(Dimension.create("duplicatedimension"));
+
+    }
+
+    @Test(
+            expectedExceptions = NullPointerException.class,
+            expectedExceptionsMessageRegExp = ".*dimension builder.*"
+    )
+    public void testFailIfDimensionIsNull() throws Exception {
+        Dataset.create().withDimension(null);
+    }
+
+    @Test(
+            expectedExceptions = NullPointerException.class,
+            expectedExceptionsMessageRegExp = ".*label.*"
+    )
+    public void testFailIfLabelIsNull() throws Exception {
+        Dataset.create().withLabel(null);
+    }
+
+    @Test(
+            expectedExceptions = NullPointerException.class,
+            expectedExceptionsMessageRegExp = ".*source.*"
+    )
+    public void testFailIfSourceIsNull() throws Exception {
+        Dataset.create().withSource(null);
+    }
+
+    @Test(
+            expectedExceptions = NullPointerException.class,
+            expectedExceptionsMessageRegExp = ".*update.*"
+    )
+    public void testFailIfUpdateIsNull() throws Exception {
+        Dataset.create().updatedAt(null);
+    }
+
     @Test
     public void testBuilder() throws Exception {
 
@@ -82,12 +128,15 @@ public class DatasetTest {
                         "T", "population 15 years old and over"
                 )));
 
-        // TODO: addDimension("name") returning Dimension.Builder? Super fluent?
+        // TODO: addDimension("name") returning Dimension.Builder? "Superfluent" ?
+        // TODO: express hierarchy with the builder? Check how ES did that with the query builders.
         builder.withDimension(Dimension.create("Location").withGeoRole());
         builder.withDimension(Dimension.create("arrival").withMetricRole());
         builder.withDimension(Dimension.create("departure").withRole(Dimension.Roles.METRIC));
 
-        builder.build();
+        Dataset build = builder.build();
+
+        assertThat(build).isNotNull();
 
     }
 
