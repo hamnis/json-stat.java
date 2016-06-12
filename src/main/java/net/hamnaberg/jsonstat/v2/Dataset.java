@@ -77,15 +77,25 @@ public class Dataset extends JsonStat {
         this.source = source;
     }
 
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
     public static class Builder {
 
         private String label;
         private String source;
         private Instant update;
         private ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
+        private Iterable<Number> values;
 
         private Builder() {
             // Should use Dataset.create()
+            dimensionBuilders = ImmutableSet.builder();
         }
 
         public Builder withLabel(final String label) {
@@ -111,6 +121,12 @@ public class Dataset extends JsonStat {
             return this;
         }
 
+        private ImmutableSet<Dimension> buildDimensions() {
+            return ImmutableSet.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::build)
+            );
+        }
+
         public Dataset build() {
 
             ImmutableSet<Dimension> dimensions = ImmutableSet.copyOf(
@@ -127,7 +143,16 @@ public class Dataset extends JsonStat {
             );
 
             Dataset dataset = new Dataset(ids, sizes);
+            dataset.setLabel(label);
+            dataset.setSource(source);
+            dataset.setUpdated(update);
+            dataset.setValue(values);
             return dataset;
+        }
+
+        public Builder withValues(java.util.Collection<Number> values) {
+            this.values = values;
+            return this;
         }
     }
 }
