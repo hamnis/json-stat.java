@@ -1,12 +1,14 @@
 package net.hamnaberg.jsonstat.v2;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.*;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -28,7 +30,7 @@ public class Dataset extends JsonStat {
     // https://json-stat.org/format/#updated
     private Instant updated = null;
     // https://json-stat.org/format/#dimension
-    private Dimension dimension;
+    private Map<String,Dimension> dimension;
     // https://json-stat.org/format/#value
     private Object value;
 
@@ -85,6 +87,14 @@ public class Dataset extends JsonStat {
         this.value = value;
     }
 
+    public Map<String, Dimension> getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(Map<String, Dimension> dimension) {
+        this.dimension = dimension;
+    }
+
     public static class Builder {
 
         private String label;
@@ -129,13 +139,13 @@ public class Dataset extends JsonStat {
 
         public Dataset build() {
 
-            ImmutableSet<Dimension> dimensions = ImmutableSet.copyOf(
-                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::build)
+            Map<String, Dimension> dimensionMap = Maps.transformValues(
+                    Maps.uniqueIndex(dimensionBuilders.build(), Dimension.Builder::getId),
+                    Dimension.Builder::build
             );
 
-            ImmutableSet<String> ids = ImmutableSet.copyOf(
-                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::getId)
-            );
+            // Optimized.
+            ImmutableSet<String> ids = ImmutableSet.copyOf(dimensionMap.keySet());
 
             // TODO Make sure this is okay.
             ImmutableList<Integer> sizes = ImmutableList.copyOf(
@@ -147,12 +157,36 @@ public class Dataset extends JsonStat {
             dataset.setSource(source);
             dataset.setUpdated(update);
             dataset.setValue(values);
+
+            dataset.setDimension(
+                dimensionMap
+            );
             return dataset;
         }
 
         public Builder withValues(java.util.Collection<Number> values) {
             this.values = values;
             return this;
+        }
+
+        public Dataset withValueMapper(Function<List<String>, Number> mapper) {
+
+            // Get all the dimensions.
+            Iterable<java.util.List<String>> dimIds = Iterables.transform(
+                    dimensionBuilders.build(),
+                    dimensionIndexes -> dimensionIndexes.getIndex().asList()
+            );
+
+            ImmutableList<List<String>> collections = ImmutableList.copyOf(dimIds);
+            List<List<String>> combinations = Lists.cartesianProduct(collections);
+
+            List<Number> values = combinations.stream().map(mapper).collect(Collectors.toList());
+
+            return withValues(values).build();
+        }
+
+        public Dataset withIdMapper(Function<List<Integer>, Number> mapper) {
+            return null;
         }
     }
 }

@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -66,12 +67,12 @@ public class DatasetTest {
 
         Dimension.Builder dimension = Dimension.create("year")
                 .withRole(Dimension.Roles.TIME)
-                .withCategories(ImmutableList.of("2003", "2004", "2005"));
+                .withCategories(ImmutableSet.of("2003", "2004", "2005"));
         builder.withDimension(dimension);
 
 
         builder.withDimension(Dimension.create("month").withRole(Dimension.Roles.TIME)
-                .withCategories(ImmutableList.of("may", "june", "july")));
+                .withCategories(ImmutableSet.of("may", "june", "july")));
 
         builder.withDimension(Dimension.create("week").withTimeRole()
                 .withLabels(ImmutableList.of("30", "31", "32")));
@@ -106,7 +107,7 @@ public class DatasetTest {
                         "T", "population 15 years old and over"
                 ).keySet().asList()
         ).stream().map(dimensions -> {
-            System.out.println(dimensions + " -> " + dimensions.hashCode() );
+            System.out.println(dimensions + " -> " + dimensions.hashCode());
             return dimensions.hashCode();
         }).collect(Collectors.toList());
         System.out.println(collect);
@@ -114,6 +115,57 @@ public class DatasetTest {
         builder.withValues(collect);
 
         mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, builder.build());
+
+    }
+
+    @Test
+    public void testValueMapper() throws Exception {
+
+        Dataset.Builder builder = Dataset.create().withLabel("")
+                .withDimension(Dimension.create("year")
+                        .withRole(Dimension.Roles.TIME)
+                        .withIndexedLabels(ImmutableMap.of("2003", "2003", "2004", "2004", "2005", "2005")))
+
+                .withDimension(Dimension.create("month").withRole(Dimension.Roles.TIME)
+                        .withIndexedLabels(ImmutableMap.of("may", "may", "june", "june", "july", "july")))
+
+                .withDimension(Dimension.create("week").withTimeRole()
+
+                        .withIndexedLabels(ImmutableMap.of("30", "30", "31", "31", "32", "32")))
+                .withDimension(Dimension.create("population")
+                        .withIndexedLabels(ImmutableMap.of(
+                                "A", "active population",
+                                "E", "employment",
+                                "U", "unemployment",
+                                "I", "inactive population",
+                                "T", "population 15 years old and over"
+                        )));
+
+        builder.withValueMapper(List::hashCode);
+
+        // Supplier.
+        List<Number> collect = Lists.cartesianProduct(
+                ImmutableList.of("2003", "2004", "2005"),
+                ImmutableList.of("may", "june", "july"),
+                ImmutableList.of("30", "31", "32"),
+                ImmutableMap.of(
+                        "A", "active population",
+                        "E", "employment",
+                        "U", "unemployment",
+                        "I", "inactive population",
+                        "T", "population 15 years old and over"
+                ).keySet().asList()
+        ).stream().map(dimensions -> {
+            System.out.println(dimensions + " -> " + dimensions.hashCode());
+            return dimensions.hashCode();
+        }).collect(Collectors.toList());
+
+        System.out.println(collect);
+
+        //builder.withValues(collect);
+
+        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, builder.build());
+
 
     }
 

@@ -2,6 +2,7 @@ package net.hamnaberg.jsonstat.v2;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import net.hamnaberg.jsonstat.JsonStat;
 
@@ -110,6 +111,8 @@ public class Dimension extends JsonStat {
 
         private final String id;
         private Roles role;
+        private ImmutableSet<String> index;
+        private ImmutableMap<String, String> label;
 
         private Builder(String id) {
             this.id = id;
@@ -130,18 +133,19 @@ public class Dimension extends JsonStat {
             return this;
         }
 
-        public Builder withCategories(ImmutableList<String> categories) {
+        public Builder withCategories(ImmutableSet<String> categories) {
             // TODO
-            return this;
+            throw new RuntimeException("Not implemented");
         }
 
         public Builder withLabels(ImmutableList<String> categories) {
             // TODO
-            return this;
+            throw new RuntimeException("Not implemented");
         }
 
         public Builder withIndexedLabels(ImmutableMap<String, String> indexedLabels) {
-            // TODO
+            index = indexedLabels.keySet();
+            label = indexedLabels;
             return this;
         }
 
@@ -159,6 +163,10 @@ public class Dimension extends JsonStat {
 
         public Dimension build() {
             return new Dimension(null);
+        }
+
+        public ImmutableSet<String> getIndex() {
+            return index;
         }
     }
 }
