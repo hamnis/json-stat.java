@@ -31,7 +31,7 @@ public class Dataset extends JsonStat {
     // https://json-stat.org/format/#updated
     private Instant updated = null;
     // https://json-stat.org/format/#dimension
-    private Map<String,Dimension> dimension;
+    private Map<String, Dimension> dimension;
     // https://json-stat.org/format/#value
     private Object value;
 
@@ -99,6 +99,15 @@ public class Dataset extends JsonStat {
 
     public void setDimension(Map<String, Dimension> dimension) {
         this.dimension = dimension;
+    }
+
+    /**
+     * Return each rows as a list of list.
+     *
+     * @return list of rows
+     */
+    public ImmutableList<ImmutableList<Object>> getRows() {
+        return null;
     }
 
     public static class Builder {
@@ -182,7 +191,7 @@ public class Dataset extends JsonStat {
             dataset.setValue(values);
 
             dataset.setDimension(
-                dimensionMap
+                    dimensionMap
             );
             return dataset;
         }
@@ -211,5 +220,19 @@ public class Dataset extends JsonStat {
         public Dataset withIdMapper(Function<List<Integer>, Number> mapper) {
             return null;
         }
+
+        /**
+         * Add a row to the dataset.
+         * <p>
+         * This method is useful to generate the dimensions based on the data.
+         *
+         * @param values values mapped with dimension ids
+         * @return the builder
+         */
+        public Builder addRow(Map<String, String> values) {
+            return null;
+        }
+
+
     }
 }
