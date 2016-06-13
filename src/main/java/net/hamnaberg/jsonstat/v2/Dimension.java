@@ -38,6 +38,10 @@ public class Dimension extends JsonStat {
         this.label = label;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
     enum Roles {
         TIME, GEO, METRIC
     }
@@ -53,13 +57,13 @@ public class Dimension extends JsonStat {
 
         // https://json-stat.org/format/#label
         // Optional, unless no index
-        private String label;
+        private ImmutableMap<String, String> label;
 
         // https://json-stat.org/format/#index
         // This can be Map or List. The order matters, and is linked to the
         // role of the dimension.
         // Optional if dimension is constant.
-        private Object index;
+        private ImmutableSet<String> index;
 
         // TODO: Any key must be in the index.
         // TODO: If present, index should be a map
@@ -73,6 +77,13 @@ public class Dimension extends JsonStat {
         // TODO: Implies that index is index is a map.
         private Map<String, String> unit;
 
+        public ImmutableMap<String, String> getLabel() {
+            return label;
+        }
+
+        public ImmutableSet<String> getIndex() {
+            return index;
+        }
     }
 
     // https://json-stat.org/format/#unit
@@ -110,6 +121,8 @@ public class Dimension extends JsonStat {
 
     public static class Builder {
 
+        private String label;
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -133,7 +146,7 @@ public class Dimension extends JsonStat {
         private final String id;
         private Roles role;
         private ImmutableSet<String> index;
-        private ImmutableMap<String, String> label;
+        private ImmutableMap<String, String> labels;
 
         private Builder(String id) {
             this.id = id;
@@ -145,12 +158,16 @@ public class Dimension extends JsonStat {
         }
 
         protected Integer size() {
-            // TODO
-            return 1;
+            return index.size();
         }
 
         public Builder withRole(final Roles role) {
             this.role = role;
+            return this;
+        }
+
+        public Builder withLabel(final String label) {
+            this.label = label;
             return this;
         }
 
@@ -166,7 +183,7 @@ public class Dimension extends JsonStat {
 
         public Builder withIndexedLabels(ImmutableMap<String, String> indexedLabels) {
             index = indexedLabels.keySet();
-            label = indexedLabels;
+            labels = indexedLabels;
             return this;
         }
 
@@ -183,8 +200,12 @@ public class Dimension extends JsonStat {
         }
 
         public Dimension build() {
-            new Dimension(new Category());
-            return new Dimension(null);
+            Category category = new Category();
+            category.index = this.index;
+            category.label = this.labels;
+            Dimension dimension = new Dimension(category);
+            dimension.setLabel(this.label);
+            return dimension;
         }
 
         public ImmutableSet<String> getIndex() {
