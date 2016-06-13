@@ -211,5 +211,13 @@ public class Dimension extends JsonStat {
         public ImmutableSet<String> getIndex() {
             return index;
         }
+
+        protected boolean isMetric() {
+            return Roles.METRIC.equals(this.getRole());
+        }
+
+        protected Roles getRole() {
+            return this.role;
+        }
     }
 }

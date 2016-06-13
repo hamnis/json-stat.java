@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -68,7 +69,7 @@ public class Dataset extends JsonStat {
         return Optional.ofNullable(updated);
     }
 
-    public void setUpdated(Instant updated) {
+    private void setUpdated(Instant updated) {
         this.updated = updated;
     }
 
@@ -76,7 +77,7 @@ public class Dataset extends JsonStat {
         return Optional.ofNullable(label);
     }
 
-    public void setLabel(String label) {
+    private void setLabel(String label) {
         this.label = label;
     }
 
@@ -84,7 +85,7 @@ public class Dataset extends JsonStat {
         return Optional.ofNullable(source);
     }
 
-    public void setSource(String source) {
+    private void setSource(String source) {
         this.source = source;
     }
 
@@ -92,7 +93,7 @@ public class Dataset extends JsonStat {
         return value;
     }
 
-    public void setValue(Object value) {
+    private void setValue(Object value) {
         this.value = value;
     }
 
@@ -100,7 +101,7 @@ public class Dataset extends JsonStat {
         return dimension;
     }
 
-    public void setDimension(Map<String, Dimension> dimension) {
+    private void setDimension(Map<String, Dimension> dimension) {
         this.dimension = dimension;
     }
 
@@ -160,7 +161,7 @@ public class Dataset extends JsonStat {
             );
         }
 
-        public Dataset build() {
+        private Dataset build() {
 
             Map<String, Dimension> dimensionMap = Maps.transformValues(
                     Maps.uniqueIndex(dimensionBuilders.build(), Dimension.Builder::getId),
@@ -264,18 +265,22 @@ public class Dataset extends JsonStat {
          * @param mapper a mapper function to use to populate the metrics in the data set
          * @return the data set
          */
-        public Dataset withMapper(Function<List<String>, Number> mapper) {
+        public Dataset withMapper(Function<List<String>, List<Number>> mapper) {
 
             // Get all the dimensions.
-            Iterable<java.util.List<String>> dimIds = Iterables.transform(
-                    dimensionBuilders.build(),
-                    dimensionIndexes -> dimensionIndexes.getIndex().asList()
-            );
+            List<ImmutableList<String>> dimIds = dimensionBuilders.build().stream()
+                    .filter(dimension -> !dimension.isMetric())
+                    .map(dimension -> dimension.getIndex().asList())
+                    .collect(Collectors.toList());
 
             ImmutableList<List<String>> collections = ImmutableList.copyOf(dimIds);
             List<List<String>> combinations = Lists.cartesianProduct(collections);
 
-            return withValues(combinations.stream().map(mapper));
+            // apply function and unroll.
+            return withValues(combinations.stream().map(mapper).flatMap(numbers -> {
+                System.out.println("Got " + numbers);
+                return numbers.stream();
+            }));
         }
 
         /**

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Created by hadrien on 07/06/16.
@@ -46,6 +47,16 @@ public class DatasetTest {
                 1, 2, 3, 4
         ));
 
+    }
+
+    @Test
+    public void testNeedAtLeastOneDimension() throws Exception {
+        fail("TODO");
+    }
+
+    @Test
+    public void testNeedAtLeastOneMetric() throws Exception {
+        fail("TODO");
     }
 
     @Test()
@@ -159,8 +170,7 @@ public class DatasetTest {
 
         //System.out.println(collect);
 
-        builder.withValues(collect);
-        Dataset build = builder.build();
+        Dataset build = builder.withValues(collect);
 
         assertThat(build).isNotNull();
 
@@ -180,8 +190,8 @@ public class DatasetTest {
                         .withIndexedLabels(ImmutableMap.of("may", "may", "june", "june", "july", "july")))
 
                 .withDimension(Dimension.create("week").withTimeRole()
-
                         .withIndexedLabels(ImmutableMap.of("30", "30", "31", "31", "32", "32")))
+
                 .withDimension(Dimension.create("population")
                         .withIndexedLabels(ImmutableMap.of(
                                 "A", "active population",
@@ -189,9 +199,19 @@ public class DatasetTest {
                                 "U", "unemployment",
                                 "I", "inactive population",
                                 "T", "population 15 years old and over"
-                        )));
+                        )))
+                .withDimension(Dimension.create("amount").withMetricRole()
+                        .withIndexedLabels(ImmutableMap.of("millions", "millions")))
 
-        builder.withMapper(List::hashCode);
+                .withDimension(Dimension.create("percent").withMetricRole()
+                        .withIndexedLabels(ImmutableMap.of("%", "percent")));
+
+
+        Dataset dataset = builder.withMapper(
+                dimensions -> Lists.newArrayList(
+                        dimensions.hashCode(),
+                        dimensions.hashCode())
+        );
 
         // Supplier.
         List<Number> collect = Lists.cartesianProduct(
@@ -214,9 +234,19 @@ public class DatasetTest {
 
         //builder.withValues(collect);
 
-        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, builder.build());
+        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, dataset);
 
 
+    }
+
+    @Test
+    public void testLessMetricsInTheMapper() throws Exception {
+        fail("TODO");
+    }
+
+    @Test
+    public void testNullsInValuesIsOk() throws Exception {
+        fail("TODO");
     }
 
     @Test
