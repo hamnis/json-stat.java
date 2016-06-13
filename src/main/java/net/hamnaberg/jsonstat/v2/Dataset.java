@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by hadrien on 07/06/16.
@@ -45,6 +46,11 @@ public class Dataset extends JsonStat {
 
     public static Builder create() {
         return new Builder();
+    }
+
+    public static Builder create(final String label) {
+        Builder builder = new Builder();
+        return builder.withLabel(label);
     }
 
     public ImmutableSet<String> getId() {
@@ -109,24 +115,29 @@ public class Dataset extends JsonStat {
         }
 
         public Builder withLabel(final String label) {
-            this.label = label;
+            this.label = checkNotNull(label, "label was null");
             return this;
         }
 
         public Builder withSource(final String source) {
-            this.source = source;
+            this.source = checkNotNull(source, "source was null");
             return this;
         }
 
-        public Builder updatedAt(final Instant instant) {
-            this.update = instant;
+        public Builder updatedAt(final Instant update) {
+            this.update = checkNotNull(update, "updated was null");
             return this;
         }
 
 
         public Builder withDimension(Dimension.Builder dimension) {
-            // TODO: Should throw error if duplicate?
-            // TODO: How to access the dimension id?
+            checkNotNull(dimension, "the dimension builder was null");
+
+
+            //if (dimensionBuilders.contains(dimension))
+            //    throw new DuplicateDimensionException(
+            //           String.format("the builder already contains the dimension %s", dimension.toString())
+            //    );
             dimensionBuilders.add(dimension);
             return this;
         }
@@ -151,6 +162,18 @@ public class Dataset extends JsonStat {
             ImmutableList<Integer> sizes = ImmutableList.copyOf(
                     Iterables.transform(dimensionBuilders.build(), Dimension.Builder::size)
             );
+
+//            ImmutableSet<Dimension> dimensions = dimensionBuilders.stream().map(
+//                    Dimension.Builder::build
+//            ).collect(
+//                    Collector.of(
+//                            ImmutableSet.Builder<Dimension>::new,
+//                            ImmutableSet.Builder<Dimension>::add,
+//                            (l, r) -> l.addAll(r.build()),
+//                            ImmutableSet.Builder<Dimension>::build,
+//                            new Collector.Characteristics[0]
+//                    )
+//            );
 
             Dataset dataset = new Dataset(ids, sizes);
             dataset.setLabel(label);

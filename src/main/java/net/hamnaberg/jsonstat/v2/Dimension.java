@@ -1,5 +1,6 @@
 package net.hamnaberg.jsonstat.v2;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -108,6 +109,26 @@ public class Dimension extends JsonStat {
     }
 
     public static class Builder {
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Builder builder = (Builder) o;
+            return Objects.equal(id, builder.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(id);
+        }
+
+        @Override
+        public String toString() {
+            return "Dimension.Builder{" +
+                    "id='" + id + '\'' +
+                    '}';
+        }
 
         private final String id;
         private Roles role;
