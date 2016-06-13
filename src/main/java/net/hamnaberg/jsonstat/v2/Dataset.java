@@ -2,13 +2,11 @@ package net.hamnaberg.jsonstat.v2;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collector;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -85,15 +83,25 @@ public class Dataset extends JsonStat {
         this.source = source;
     }
 
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
     public static class Builder {
 
         private String label;
         private String source;
         private Instant update;
-        private Set<Dimension.Builder> dimensionBuilders = Sets.newHashSet();
+        private ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
+        private Iterable<Number> values;
 
         private Builder() {
             // Should use Dataset.create()
+            dimensionBuilders = ImmutableSet.builder();
         }
 
         public Builder withLabel(final String label) {
@@ -115,55 +123,59 @@ public class Dataset extends JsonStat {
         public Builder withDimension(Dimension.Builder dimension) {
             checkNotNull(dimension, "the dimension builder was null");
 
-            if (dimensionBuilders.contains(dimension))
-                throw new DuplicateDimensionException(
-                        String.format("the builder already contains the dimension %s", dimension.toString())
-                );
+
+            //if (dimensionBuilders.contains(dimension))
+            //    throw new DuplicateDimensionException(
+            //           String.format("the builder already contains the dimension %s", dimension.toString())
+            //    );
             dimensionBuilders.add(dimension);
             return this;
         }
 
+        private ImmutableSet<Dimension> buildDimensions() {
+            return ImmutableSet.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::build)
+            );
+        }
+
         public Dataset build() {
 
-            ImmutableSet<String> ids = dimensionBuilders.stream()
-                    .map(Dimension.Builder::getId)
-                    .collect(
-                            Collector.of(
-                                    ImmutableSet.Builder<String>::new,
-                                    ImmutableSet.Builder<String>::add,
-                                    (l, r) -> l.addAll(r.build()),
-                                    ImmutableSet.Builder<String>::build,
-                                    new Collector.Characteristics[0]
-                            )
-                    );
-
-            ImmutableList<Integer> sizes = dimensionBuilders.stream()
-                    .map(Dimension.Builder::size)
-                    .collect(
-                            Collector.of(
-                                    ImmutableList.Builder<Integer>::new,
-                                    ImmutableList.Builder<Integer>::add,
-                                    (l, r) -> l.addAll(r.build()),
-                                    ImmutableList.Builder<Integer>::build,
-                                    new Collector.Characteristics[0]
-                            )
-                    );
-
-            // TODO Make sure this is okay.
-            ImmutableSet<Dimension> dimensions = dimensionBuilders.stream().map(
-                    Dimension.Builder::build
-            ).collect(
-                    Collector.of(
-                            ImmutableSet.Builder<Dimension>::new,
-                            ImmutableSet.Builder<Dimension>::add,
-                            (l, r) -> l.addAll(r.build()),
-                            ImmutableSet.Builder<Dimension>::build,
-                            new Collector.Characteristics[0]
-                    )
+            ImmutableSet<Dimension> dimensions = ImmutableSet.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::build)
             );
 
+            ImmutableSet<String> ids = ImmutableSet.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::getId)
+            );
+
+            // TODO Make sure this is okay.
+            ImmutableList<Integer> sizes = ImmutableList.copyOf(
+                    Iterables.transform(dimensionBuilders.build(), Dimension.Builder::size)
+            );
+
+//            ImmutableSet<Dimension> dimensions = dimensionBuilders.stream().map(
+//                    Dimension.Builder::build
+//            ).collect(
+//                    Collector.of(
+//                            ImmutableSet.Builder<Dimension>::new,
+//                            ImmutableSet.Builder<Dimension>::add,
+//                            (l, r) -> l.addAll(r.build()),
+//                            ImmutableSet.Builder<Dimension>::build,
+//                            new Collector.Characteristics[0]
+//                    )
+//            );
+
             Dataset dataset = new Dataset(ids, sizes);
+            dataset.setLabel(label);
+            dataset.setSource(source);
+            dataset.setUpdated(update);
+            dataset.setValue(values);
             return dataset;
+        }
+
+        public Builder withValues(java.util.Collection<Number> values) {
+            this.values = values;
+            return this;
         }
     }
 }

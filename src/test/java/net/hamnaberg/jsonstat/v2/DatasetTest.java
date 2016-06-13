@@ -7,11 +7,14 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import net.hamnaberg.jsonstat.JsonStatModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -107,19 +110,19 @@ public class DatasetTest {
         builder.withSource("");
         builder.updatedAt(Instant.now());
 
-        Dimension.Builder dimension = Dimension.create("dimension")
+        Dimension.Builder dimension = Dimension.create("year")
                 .withRole(Dimension.Roles.TIME)
                 .withCategories(ImmutableList.of("2003", "2004", "2005"));
         builder.withDimension(dimension);
 
 
-        builder.withDimension(Dimension.create("firstTime").withRole(Dimension.Roles.TIME)
-                .withCategories(ImmutableList.of("2003", "2004", "2005")));
+        builder.withDimension(Dimension.create("month").withRole(Dimension.Roles.TIME)
+                .withCategories(ImmutableList.of("may", "june", "july")));
 
-        builder.withDimension(Dimension.create("secondTime").withTimeRole()
-                .withLabels(ImmutableList.of("2003", "2004", "2005")));
+        builder.withDimension(Dimension.create("week").withTimeRole()
+                .withLabels(ImmutableList.of("30", "31", "32")));
 
-        builder.withDimension(Dimension.create("thirdTime")
+        builder.withDimension(Dimension.create("population")
                 .withIndexedLabels(ImmutableMap.of(
                         "A", "active population",
                         "E", "employment",
@@ -130,13 +133,38 @@ public class DatasetTest {
 
         // TODO: addDimension("name") returning Dimension.Builder? "Superfluent" ?
         // TODO: express hierarchy with the builder? Check how ES did that with the query builders.
-        builder.withDimension(Dimension.create("Location").withGeoRole());
+        //builder.withDimension(Dimension.create("location")
+        //        .withGeoRole());
         builder.withDimension(Dimension.create("arrival").withMetricRole());
         builder.withDimension(Dimension.create("departure").withRole(Dimension.Roles.METRIC));
 
+
+
+        // Supplier.
+        List<Number> collect = Lists.cartesianProduct(
+                ImmutableList.of("2003", "2004", "2005"),
+                ImmutableList.of("may", "june", "july"),
+                ImmutableList.of("30", "31", "32"),
+                ImmutableMap.of(
+                        "A", "active population",
+                        "E", "employment",
+                        "U", "unemployment",
+                        "I", "inactive population",
+                        "T", "population 15 years old and over"
+                ).keySet().asList()
+        ).stream().map(dimensions -> {
+            //System.out.println(dimensions + " -> " + dimensions.hashCode() );
+            return dimensions.hashCode();
+        }).collect(Collectors.toList());
+
+        //System.out.println(collect);
+
+        builder.withValues(collect);
         Dataset build = builder.build();
 
         assertThat(build).isNotNull();
+
+        //mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, builder.build());
 
     }
 
@@ -151,7 +179,7 @@ public class DatasetTest {
                 1, 1
         ));
 
-        //mapper.writeValue(System.out, dataset);
+        mapper.writeValue(System.out, dataset);
 
     }
 
