@@ -4,11 +4,14 @@ import com.google.common.collect.*;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -115,12 +118,12 @@ public class Dataset extends JsonStat {
         private String label;
         private String source;
         private Instant update;
-        private ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
-        private Iterable<Number> values;
+        private final ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
+        private final ImmutableList.Builder values;
 
         private Builder() {
-            // Should use Dataset.create()
-            dimensionBuilders = ImmutableSet.builder();
+            this.dimensionBuilders = ImmutableSet.builder();
+            this.values = ImmutableList.builder();
         }
 
         public Builder withLabel(final String label) {
@@ -196,12 +199,72 @@ public class Dataset extends JsonStat {
             return dataset;
         }
 
-        public Builder withValues(java.util.Collection<Number> values) {
-            this.values = values;
-            return this;
+        /**
+         * Populate the data set with values.
+         * <p>
+         * The values are expected to be flattened in row-major order. For example if we have three dimensions
+         * (A, B and C) with 3, 2 and 4 categories respectively, the values should be ordered iterating first by the 4
+         * categories of C, then by the 2 categories of B and finally by the 3 categories of A:
+         * <p>
+         * <pre>
+         *   A1B1C1   A1B1C2   A1B1C3   A1B1C4
+         *   A1B2C1   A1B2C2   A1B2C3   A1B2C4
+         *
+         *   A2B1C1   A2B1C2   A2B1C3   A1B1C4
+         *   A2B2C1   A2B2C2   A2B2C3   A2B2C4
+         *
+         *   A3B1C1   A3B1C2   A3B1C3   A3B1C4
+         *   A3B2C1   A3B2C2   A3B2C3   A3B2C4
+         * </pre>
+         *
+         * @param values the values in row-major order
+         * @return a built data set
+         */
+        public Dataset withValues(java.util.Collection<Number> values) {
+            checkNotNull(values);
+
+            if (values.isEmpty())
+                return withValues(Stream.empty());
+
+            return withValues(values.stream());
         }
 
-        public Dataset withValueMapper(Function<List<String>, Number> mapper) {
+        public Dataset withValues(Iterable<Number> values) {
+            checkNotNull(values);
+
+            // Optimization.
+            if (!values.iterator().hasNext())
+                return withValues(Stream.empty());
+
+            return withValues(StreamSupport.stream(
+                    values.spliterator(),
+                    false
+            ));
+        }
+
+        public Dataset withValues(Stream<Number> values) {
+            checkNotNull(values);
+
+            Dataset dataset = this.build();
+
+            // TODO: Does it make sense to create an empty data set?
+            if (Stream.empty().equals(values))
+                dataset.setValue(Collections.emptyList());
+            else
+                dataset.setValue(values.collect(immutableList()));
+
+            return dataset;
+        }
+
+        /**
+         * Use a mapper function to populate the metrics in the data set.
+         * <p>
+         * The mapper function will be called for every combination of dimensions.
+         *
+         * @param mapper a mapper function to use to populate the metrics in the data set
+         * @return the data set
+         */
+        public Dataset withMapper(Function<List<String>, Number> mapper) {
 
             // Get all the dimensions.
             Iterable<java.util.List<String>> dimIds = Iterables.transform(
@@ -212,27 +275,18 @@ public class Dataset extends JsonStat {
             ImmutableList<List<String>> collections = ImmutableList.copyOf(dimIds);
             List<List<String>> combinations = Lists.cartesianProduct(collections);
 
-            List<Number> values = combinations.stream().map(mapper).collect(Collectors.toList());
-
-            return withValues(values).build();
-        }
-
-        public Dataset withIdMapper(Function<List<Integer>, Number> mapper) {
-            return null;
+            return withValues(combinations.stream().map(mapper));
         }
 
         /**
-         * Add a row to the dataset.
-         * <p>
-         * This method is useful to generate the dimensions based on the data.
-         *
-         * @param values values mapped with dimension ids
-         * @return the builder
+         * Collect a stream of elements into an {@link ImmutableList}.
          */
-        public Builder addRow(Map<String, String> values) {
-            return null;
+        private static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> immutableList() {
+            return Collector.of(ImmutableList.Builder<T>::new,
+                    ImmutableList.Builder<T>::add,
+                    (l, r) -> l.addAll(r.build()),
+                    ImmutableList.Builder<T>::build);
         }
-
 
     }
 }

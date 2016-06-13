@@ -191,7 +191,7 @@ public class DatasetTest {
                                 "T", "population 15 years old and over"
                         )));
 
-        builder.withValueMapper(List::hashCode);
+        builder.withMapper(List::hashCode);
 
         // Supplier.
         List<Number> collect = Lists.cartesianProduct(

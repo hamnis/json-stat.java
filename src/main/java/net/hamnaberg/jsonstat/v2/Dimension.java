@@ -183,6 +183,7 @@ public class Dimension extends JsonStat {
         }
 
         public Dimension build() {
+            new Dimension(new Category());
             return new Dimension(null);
         }
 
