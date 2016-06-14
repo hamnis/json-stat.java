@@ -9,6 +9,8 @@ import net.hamnaberg.jsonstat.JsonStat;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by hadrien on 07/06/16.
@@ -121,7 +123,19 @@ public class Dimension extends JsonStat {
 
     public static class Builder {
 
+        private final String id;
+        private final ImmutableSet.Builder<String> index;
+        private final ImmutableMap.Builder<String, String> labels;
+
         private String label;
+        private Roles role;
+
+        private Builder(String id) {
+            this.id = id;
+            this.index = ImmutableSet.builder();
+            this.labels = ImmutableMap.builder();
+            // Use Dimension.create()
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -138,27 +152,18 @@ public class Dimension extends JsonStat {
 
         @Override
         public String toString() {
-            return "Dimension.Builder{" +
+            return "DimensionBuilder{" +
                     "id='" + id + '\'' +
                     '}';
-        }
-
-        private final String id;
-        private Roles role;
-        private ImmutableSet<String> index;
-        private ImmutableMap<String, String> labels;
-
-        private Builder(String id) {
-            this.id = id;
-            // Use Dimension.create()
         }
 
         protected String getId() {
             return id;
         }
 
+        // TODO: Should this be accessible at this stage? Maybe best to delay until dimension are build.
         protected Integer size() {
-            return index.size();
+            return index.build().size();
         }
 
         public Builder withRole(final Roles role) {
@@ -171,45 +176,95 @@ public class Dimension extends JsonStat {
             return this;
         }
 
+        public Builder withCategories(String... categories) {
+            return withCategories(ImmutableSet.copyOf(categories));
+        }
+
         public Builder withCategories(ImmutableSet<String> categories) {
-            // TODO
-            throw new RuntimeException("Not implemented");
+            Map<String, String> newIndexedLabels = categories.stream()
+                    .collect(
+                            Collectors.toMap(
+                                    Function.identity(),
+                                    Function.identity()
+                            )
+                    );
+            return withIndexedLabels(ImmutableMap.copyOf(newIndexedLabels));
+        }
+
+        public Builder withLabels(String... categories) {
+            return withLabels(ImmutableList.copyOf(categories));
         }
 
         public Builder withLabels(ImmutableList<String> categories) {
-            // TODO
-            throw new RuntimeException("Not implemented");
+            final Integer[] size = {labels.build().size()};
+            Map<String, String> newIndexedLabels = categories.stream()
+                    .collect(
+                            Collectors.toMap(s ->
+                                            Integer.toString(size[0]++, 36),
+                                    Function.identity()
+                            )
+                    );
+            return withIndexedLabels(ImmutableMap.copyOf(newIndexedLabels));
+
         }
 
+        /**
+         * Set the values of the dimension in index/label form.
+         *
+         * @param indexedLabels
+         * @return
+         */
         public Builder withIndexedLabels(ImmutableMap<String, String> indexedLabels) {
-            index = indexedLabels.keySet();
-            labels = indexedLabels;
+            // TODO: index seems unnecessary, we could use index.keySet()
+            index.addAll(indexedLabels.keySet());
+            labels.putAll(indexedLabels);
             return this;
         }
 
+        /**
+         * Set GEO role.
+         * <p>
+         * Equivalent to {@code this.withRole(Roles.GEO);}
+         *
+         * @return the builder
+         */
         public Builder withGeoRole() {
             return this.withRole(Roles.GEO);
         }
 
+        /**
+         * Set METRIC role.
+         * <p>
+         * Equivalent to {@code this.withRole(Roles.METRIC);}
+         *
+         * @return the builder
+         */
         public Builder withMetricRole() {
             return this.withRole(Roles.METRIC);
         }
 
+        /**
+         * Set TIME role.
+         * <p>
+         * Equivalent to {@code this.withRole(Roles.TIME);}
+         *
+         * @return the builder
+         */
         public Builder withTimeRole() {
             return this.withRole(Roles.TIME);
         }
 
         public Dimension build() {
             Category category = new Category();
-            category.index = this.index;
-            category.label = this.labels;
+            category.index = this.index.build();
+            category.label = this.labels.build();
             Dimension dimension = new Dimension(category);
             dimension.setLabel(this.label);
             return dimension;
         }
 
         public ImmutableSet<String> getIndex() {
-            return index;
+            return index.build();
         }
 
         protected boolean isMetric() {

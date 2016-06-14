@@ -4,10 +4,7 @@ import com.google.common.collect.*;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -37,7 +34,7 @@ public class Dataset extends JsonStat {
     // https://json-stat.org/format/#dimension
     private Map<String, Dimension> dimension;
     // https://json-stat.org/format/#value
-    private Object value;
+    private List<Object> value;
 
     protected Dataset(ImmutableSet<String> id, ImmutableList<Integer> size) {
         super(Version.TWO, Class.DATASET);
@@ -93,7 +90,7 @@ public class Dataset extends JsonStat {
         return value;
     }
 
-    private void setValue(Object value) {
+    private void setValue(List<Object> value) {
         this.value = value;
     }
 
@@ -110,21 +107,69 @@ public class Dataset extends JsonStat {
      *
      * @return list of rows
      */
-    public ImmutableList<ImmutableList<Object>> getRows() {
-        return null;
+    public Iterable<List<Object>> getRows() {
+        return Iterables.paddedPartition(this.value, this.id.size());
+    }
+
+    /**
+     * Return each rows with defined list of dimensions.
+     *
+     * @param dimensions the dimension to return
+     * @return list of rows
+     */
+    public Iterable<List<Object>> getRows(String... dimensions) {
+
+        return getRows(Arrays.asList(dimensions));
+    }
+
+    /**
+     * Return each rows with defined list of dimensions.
+     *
+     * @param dimensionsFilter the dimension to return
+     * @return list of rows
+     */
+    private Iterable<List<Object>> getRows(List<String> dimensionsFilter) {
+
+        List<Boolean> index = Lists.newArrayList();
+        for (String dimension : this.id.asList()) {
+            if (dimensionsFilter.contains(dimension))
+                index.add(true);
+            else
+                index.add(false);
+        }
+
+        return Iterables.transform(getRows(), input -> {
+            ImmutableList.Builder<Object> filteredRow = ImmutableList.builder();
+            for (int i = 0; i < index.size(); i++) {
+                if (index.get(i))
+                    filteredRow.add(input.get(i));
+            }
+            return filteredRow.build();
+        });
+
     }
 
     public static class Builder {
 
+        private final ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
+        private final ImmutableList.Builder values;
         private String label;
         private String source;
         private Instant update;
-        private final ImmutableSet.Builder<Dimension.Builder> dimensionBuilders;
-        private final ImmutableList.Builder values;
 
         private Builder() {
             this.dimensionBuilders = ImmutableSet.builder();
             this.values = ImmutableList.builder();
+        }
+
+        /**
+         * Collect a stream of elements into an {@link ImmutableList}.
+         */
+        private static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> immutableList() {
+            return Collector.of(ImmutableList.Builder<T>::new,
+                    ImmutableList.Builder<T>::add,
+                    (l, r) -> l.addAll(r.build()),
+                    ImmutableList.Builder<T>::build);
         }
 
         public Builder withLabel(final String label) {
@@ -141,7 +186,6 @@ public class Dataset extends JsonStat {
             this.update = checkNotNull(update, "updated was null");
             return this;
         }
-
 
         public Builder withDimension(Dimension.Builder dimension) {
             checkNotNull(dimension, "the dimension builder was null");
@@ -161,7 +205,7 @@ public class Dataset extends JsonStat {
             );
         }
 
-        private Dataset build() {
+        public Dataset build() {
 
             Map<String, Dimension> dimensionMap = Maps.transformValues(
                     Maps.uniqueIndex(dimensionBuilders.build(), Dimension.Builder::getId),
@@ -176,28 +220,56 @@ public class Dataset extends JsonStat {
                     Iterables.transform(dimensionBuilders.build(), Dimension.Builder::size)
             );
 
-//            ImmutableSet<Dimension> dimensions = dimensionBuilders.stream().map(
-//                    Dimension.Builder::build
-//            ).collect(
-//                    Collector.of(
-//                            ImmutableSet.Builder<Dimension>::new,
-//                            ImmutableSet.Builder<Dimension>::add,
-//                            (l, r) -> l.addAll(r.build()),
-//                            ImmutableSet.Builder<Dimension>::build,
-//                            new Collector.Characteristics[0]
-//                    )
-//            );
-
             Dataset dataset = new Dataset(ids, sizes);
             dataset.setLabel(label);
             dataset.setSource(source);
             dataset.setUpdated(update);
-            dataset.setValue(values);
+            dataset.setValue(values.build());
 
             dataset.setDimension(
                     dimensionMap
             );
             return dataset;
+        }
+
+        /**
+         * Populate the data set with values.
+         * <p>
+         * The values are expected to be flattened in row-major order. See {@link Builder#withValues(Stream)} for a
+         * details about row-major order.
+         *
+         * @param values the values in row-major order
+         * @return a built data set
+         */
+        public Dataset withValues(java.util.Collection<Number> values) {
+            checkNotNull(values);
+
+            if (values.isEmpty())
+                return withValues(Stream.empty());
+
+            return withValues(values.stream());
+        }
+
+        /**
+         * Populate the data set with values.
+         * <p>
+         * The values are expected to be flattened in row-major order. See {@link Builder#withValues(Stream)} for a
+         * details about row-major order.
+         *
+         * @param values the values in row-major order
+         * @return a built data set
+         */
+        public Dataset withValues(Iterable<Number> values) {
+            checkNotNull(values);
+
+            // Optimization.
+            if (!values.iterator().hasNext())
+                return withValues(Stream.empty());
+
+            return withValues(StreamSupport.stream(
+                    values.spliterator(),
+                    false
+            ));
         }
 
         /**
@@ -221,28 +293,6 @@ public class Dataset extends JsonStat {
          * @param values the values in row-major order
          * @return a built data set
          */
-        public Dataset withValues(java.util.Collection<Number> values) {
-            checkNotNull(values);
-
-            if (values.isEmpty())
-                return withValues(Stream.empty());
-
-            return withValues(values.stream());
-        }
-
-        public Dataset withValues(Iterable<Number> values) {
-            checkNotNull(values);
-
-            // Optimization.
-            if (!values.iterator().hasNext())
-                return withValues(Stream.empty());
-
-            return withValues(StreamSupport.stream(
-                    values.spliterator(),
-                    false
-            ));
-        }
-
         public Dataset withValues(Stream<Number> values) {
             checkNotNull(values);
 
@@ -283,15 +333,21 @@ public class Dataset extends JsonStat {
             }));
         }
 
-        /**
-         * Collect a stream of elements into an {@link ImmutableList}.
-         */
-        private static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> immutableList() {
-            return Collector.of(ImmutableList.Builder<T>::new,
-                    ImmutableList.Builder<T>::add,
-                    (l, r) -> l.addAll(r.build()),
-                    ImmutableList.Builder<T>::build);
-        }
+        public Builder addRow(ImmutableMap<String, ?> row) {
 
+            for (Dimension.Builder dimension : dimensionBuilders.build()) {
+                String id = dimension.getId();
+
+                // Save the dimension values.
+                if (!dimension.isMetric())
+                    dimension.withCategories(row.get(id).toString());
+                // Add the value.
+                values.add(row.get(id));
+
+            }
+
+            return this;
+
+        }
     }
 }
