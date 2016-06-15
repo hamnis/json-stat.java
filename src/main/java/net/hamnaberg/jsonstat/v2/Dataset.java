@@ -1,5 +1,6 @@
 package net.hamnaberg.jsonstat.v2;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.*;
 import net.hamnaberg.jsonstat.JsonStat;
 
@@ -15,105 +16,171 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Created by hadrien on 07/06/16.
+ * A model of the JSON-stat dataset format.
+ * <p>
+ * This model is a java based implementation of the JSON-stat format defined on
+ * <a href="https://json-stat.org/">json-stat.org/</a>. It relies heavily on Java 8 and the Google Guava library.
+ * <p>
+ * Instances of this class are immutable and must be created using the provided {@link Dataset#create(String)} static
+ * method.
  */
 public class Dataset extends JsonStat {
 
-    // https://json-stat.org/format/#id
-    // Cannot be empty. Should retain order.
+    // TODO: Use a set and transform to list.
     private final ImmutableSet<String> id;
-    // https://json-stat.org/format/#size
-    // Should be same order and size than id.
     private final ImmutableList<Integer> size;
-    // https://json-stat.org/format/#label
+
     private String label = null;
-    // https://json-stat.org/format/#source}
     private String source = null;
-    // https://json-stat.org/format/#updated
     private Instant updated = null;
-    // https://json-stat.org/format/#dimension
     private Map<String, Dimension> dimension;
-    // https://json-stat.org/format/#value
     private List<Object> value;
 
     protected Dataset(ImmutableSet<String> id, ImmutableList<Integer> size) {
         super(Version.TWO, Class.DATASET);
-
         checkArgument(id.size() == size.size(), "size and property sizes do not match");
-
         this.id = id;
         this.size = size;
     }
 
+    /**
+     * Create a new {@link Dataset.Builder} instance.
+     */
     public static Builder create() {
         return new Builder();
     }
 
+    /**
+     * Create a new {@link Dataset.Builder} instance.
+     */
     public static Builder create(String label) {
         Builder builder = new Builder();
         return builder.withLabel(label);
     }
 
+    /**
+     * Return an {@link ImmutableSet} with the available dimensions in
+     * the dataset, in order. It is consistent with {@link #getSize()}.
+     *
+     * @see <a href="https://json-stat.org/format/#id">json-stat.org/format/#id</a>
+     */
     public ImmutableSet<String> getId() {
+        // Cannot be empty. Should retain order.
+        // Should be same order and size than id.
         return id;
     }
 
+    /**
+     * Return an {@link ImmutableList} with the size of the available dimensions in
+     * the dataset, in order. It is consistent with {@link #getId()}.
+     *
+     * @see <a href="https://json-stat.org/format/#size">json-stat.org/format/#size</a>
+     */
     public ImmutableList<Integer> getSize() {
+        // Cannot be empty. Should retain order.
+        // Should be same order and size than id.
         return size;
     }
 
+    /**
+     * Return the update time of the dataset.
+     *
+     * @see <a href="https://json-stat.org/format/#updated">json-stat.org/format/#updated</a>
+     */
     public Optional<Instant> getUpdated() {
+        //  ISO 8601 format recognized by the Javascript Date.parse method (see ECMA-262 Date Time String Format).
         return Optional.ofNullable(updated);
     }
 
 
+    /**
+     * Return the label of the dataset.
+     *
+     * @see <a href="https://json-stat.org/format/#label">json-stat.org/format/#label</a>
+     */
     public Optional<String> getLabel() {
         return Optional.ofNullable(label);
     }
 
+    /**
+     * Return the source of the dataset.
+     *
+     * @see <a href="https://json-stat.org/format/#source">json-stat.org/format/#source</a>
+     */
     public Optional<String> getSource() {
         return Optional.ofNullable(source);
     }
 
+    /**
+     * Return the value sorted according to the dimensions of the dataset.
+     *
+     * @see <a href="https://json-stat.org/format/#value">json-stat.org/format/#value</a>
+     */
     public Object getValue() {
         return value;
     }
 
+    /**
+     * Return the dimensions of the dataset.
+     *
+     * @see Dimension
+     * @see <a href="https://json-stat.org/format/#dimension">json-stat.org/format/#dimension</a>
+     */
     public Map<String, Dimension> getDimension() {
         return dimension;
     }
 
     /**
-     * Return each rows as a list of list.
-     *
-     * @return list of rows
+     * Utility method that returns a {@link Iterable} of {@link List}s going through the data set
+     * row by row and cell by cell, in the order defined by the dimensions.
      */
+    @JsonIgnore
     public Iterable<List<Object>> getRows() {
         return Iterables.paddedPartition(this.value, this.id.size());
     }
 
     /**
-     * Return each rows with defined list of dimensions.
+     * Utility method that returns a {@link Iterable} of {@link List}s going through the data set
+     * row by row and cell by cell just as {@link #getRows()} does, but restrict the result to the
+     * passed dimensions.
+     * <p>
+     * Note that although the order in which the cells are returned is defined by the passed
+     * dimension names, the order of the rows is still defined by the dimensions.
      *
      * @param dimensions the dimension to return
      * @return list of rows
+     * @throws IllegalArgumentException if any of the dimension names is not in the dataset
+     * @throws NullPointerException     if any of the dimension names is null
      */
+    @JsonIgnore
     public Iterable<List<Object>> getRows(String... dimensions) {
-
         return getRows(Arrays.asList(dimensions));
     }
 
     /**
-     * Return each rows with defined list of dimensions.
+     * Utility method that returns a {@link Iterable} of {@link List}s going through the data set
+     * row by row and cell by cell just as {@link #getRows()} does, but restrict the result to the
+     * passed dimensions.
+     * <p>
+     * Note that although the order in which the cells are returned is defined by the passed
+     * dimension names, the order of the rows is still defined by the dimensions.
      *
-     * @param dimensionsFilter the dimension to return
+     * @param dimensions the dimension to return
      * @return list of rows
+     * @throws IllegalArgumentException if any of the dimension names is not in the dataset
+     * @throws NullPointerException     if any of the dimension names is null
      */
-    public Iterable<List<Object>> getRows(List<String> dimensionsFilter) {
+    public Iterable<List<Object>> getRows(List<String> dimensions) {
+
+        if (dimensions.isEmpty())
+            return getRows();
+
+        if (this.id.containsAll(dimensions))
+            return Collections.emptyList();
 
         List<Boolean> index = Lists.newArrayList();
         for (String dimension : this.id.asList()) {
-            if (dimensionsFilter.contains(dimension))
+            if (dimensions.contains(dimension))
                 index.add(true);
             else
                 index.add(false);
