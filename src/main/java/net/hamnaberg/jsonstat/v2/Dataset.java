@@ -49,7 +49,7 @@ public class Dataset extends JsonStat {
         return new Builder();
     }
 
-    public static Builder create(final String label) {
+    public static Builder create(String label) {
         Builder builder = new Builder();
         return builder.withLabel(label);
     }
@@ -66,40 +66,21 @@ public class Dataset extends JsonStat {
         return Optional.ofNullable(updated);
     }
 
-    private void setUpdated(Instant updated) {
-        this.updated = updated;
-    }
 
     public Optional<String> getLabel() {
         return Optional.ofNullable(label);
-    }
-
-    private void setLabel(String label) {
-        this.label = label;
     }
 
     public Optional<String> getSource() {
         return Optional.ofNullable(source);
     }
 
-    private void setSource(String source) {
-        this.source = source;
-    }
-
     public Object getValue() {
         return value;
     }
 
-    private void setValue(List<Object> value) {
-        this.value = value;
-    }
-
     public Map<String, Dimension> getDimension() {
         return dimension;
-    }
-
-    private void setDimension(Map<String, Dimension> dimension) {
-        this.dimension = dimension;
     }
 
     /**
@@ -128,7 +109,7 @@ public class Dataset extends JsonStat {
      * @param dimensionsFilter the dimension to return
      * @return list of rows
      */
-    private Iterable<List<Object>> getRows(List<String> dimensionsFilter) {
+    public Iterable<List<Object>> getRows(List<String> dimensionsFilter) {
 
         List<Boolean> index = Lists.newArrayList();
         for (String dimension : this.id.asList()) {
@@ -221,14 +202,12 @@ public class Dataset extends JsonStat {
             );
 
             Dataset dataset = new Dataset(ids, sizes);
-            dataset.setLabel(label);
-            dataset.setSource(source);
-            dataset.setUpdated(update);
-            dataset.setValue(values.build());
+            dataset.label = label;
+            dataset.source = source;
+            dataset.updated = update;
+            dataset.value = values.build();
+            dataset.dimension = dimensionMap;
 
-            dataset.setDimension(
-                    dimensionMap
-            );
             return dataset;
         }
 
@@ -300,9 +279,9 @@ public class Dataset extends JsonStat {
 
             // TODO: Does it make sense to create an empty data set?
             if (Stream.empty().equals(values))
-                dataset.setValue(Collections.emptyList());
+                dataset.value = Collections.emptyList();
             else
-                dataset.setValue(values.collect(immutableList()));
+                dataset.value = values.collect(immutableList());
 
             return dataset;
         }
