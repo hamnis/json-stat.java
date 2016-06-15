@@ -1,5 +1,7 @@
 package net.hamnaberg.jsonstat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by hadrien on 07/06/16.
  *
@@ -14,6 +16,15 @@ public class JsonStat {
     public JsonStat(Version version, Class clazz) {
         this.version = version;
         this.clazz = clazz;
+    }
+
+    public String getVersion() {
+        return version.getTag();
+    }
+
+    @JsonProperty("class")
+    public String getClazz() {
+        return clazz.toString().toLowerCase();
     }
 
     public enum Version {
