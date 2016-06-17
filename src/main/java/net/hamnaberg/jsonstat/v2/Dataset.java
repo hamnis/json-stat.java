@@ -160,10 +160,10 @@ public class Dataset extends JsonStat {
 
     /**
      * Utility method that returns a {@link Iterable} of {@link List}s going through the data set
-     * row by row and cell by cell just as {@link #getRows()} does, but restrict the result to the
-     * passed dimensions.
+     * row by row and cell by cell just as {@link #getRows()} does, but restricts the result to the
+     * given dimensions.
      * <p>
-     * Note that although the order in which the cells are returned is defined by the passed
+     * Note that although the order in which the cells are returned is defined by the given
      * dimension names, the order of the rows is still defined by the dimensions.
      *
      * @param dimensions the dimension to return
@@ -174,10 +174,10 @@ public class Dataset extends JsonStat {
     public Iterable<List<Object>> getRows(List<String> dimensions) {
 
         if (dimensions.isEmpty())
-            return getRows();
-
-        if (this.id.containsAll(dimensions))
             return Collections.emptyList();
+
+        if (dimensions.containsAll(this.id))
+            return getRows();
 
         List<Boolean> index = Lists.newArrayList();
         for (String dimension : this.id.asList()) {

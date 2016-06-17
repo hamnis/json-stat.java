@@ -13,7 +13,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -214,6 +216,44 @@ public class DatasetTest {
 
         assertThat(result).containsExactlyElementsOf(expected);
 
+    }
+
+    @Test
+    public void testGetRowsEmtpy() throws Exception {
+        Dataset dataset = Dataset.create("test")
+                .withDimension(
+                        Dimension.create("A")
+                                .withCategories("A1", "A2", "A3"))
+                .withDimension(Dimension.create("B")
+                        .withCategories("B1", "B2"))
+                .withDimension(Dimension.create("C")
+                        .withCategories("C1", "C2", "C3", "C4")
+                ).withMapper(strings -> {
+                    return newArrayList(String.join("", strings).hashCode());
+                });
+
+        assertThat(dataset.getRows(Collections.emptyList())).isEmpty();
+    }
+
+    @Test
+    public void testGetRowsAllDimensions() throws Exception {
+        Dataset dataset = Dataset.create("test")
+                .withDimension(
+                        Dimension.create("A")
+                                .withCategories("A1", "A2", "A3"))
+                .withDimension(Dimension.create("B")
+                        .withCategories("B1", "B2"))
+                .withDimension(Dimension.create("C")
+                        .withCategories("C1", "C2", "C3", "C4")
+                ).withMapper(strings -> {
+                    return newArrayList(String.join("", strings).hashCode());
+                });
+
+        List<Object> result = StreamSupport.stream(dataset.getRows(Arrays.asList("A", "B", "C")).spliterator(), false)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        assertThat(result).hasSize(3 * 2 * 4);
     }
 
     @Test
