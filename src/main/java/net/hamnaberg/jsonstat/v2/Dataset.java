@@ -2,12 +2,13 @@ package net.hamnaberg.jsonstat.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.*;
+import me.yanaga.guava.stream.MoreCollectors;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -210,16 +211,6 @@ public class Dataset extends JsonStat {
             this.values = ImmutableList.builder();
         }
 
-        /**
-         * Collect a stream of elements into an {@link ImmutableList}.
-         */
-        private static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> immutableList() {
-            return Collector.of(ImmutableList.Builder<T>::new,
-                    ImmutableList.Builder<T>::add,
-                    (l, r) -> l.addAll(r.build()),
-                    ImmutableList.Builder<T>::build);
-        }
-
         public Builder withLabel(final String label) {
             this.label = checkNotNull(label, "label was null");
             return this;
@@ -348,7 +339,7 @@ public class Dataset extends JsonStat {
             if (Stream.empty().equals(values))
                 dataset.value = Collections.emptyList();
             else
-                dataset.value = values.collect(immutableList());
+                dataset.value = values.collect(MoreCollectors.toImmutableList());
 
             return dataset;
         }
@@ -364,19 +355,17 @@ public class Dataset extends JsonStat {
         public Dataset withMapper(Function<List<String>, List<Number>> mapper) {
 
             // Get all the dimensions.
-            List<ImmutableList<String>> dimIds = dimensionBuilders.build().stream()
+            List<ImmutableList<String>> dimensions = dimensionBuilders.build().stream()
                     .filter(dimension -> !dimension.isMetric())
                     .map(dimension -> dimension.getIndex().asList())
-                    .collect(Collectors.toList());
+                    // TODO: Find out what the order should be here.
+                    //.sorted(Comparator.comparingInt(AbstractCollection::size))
+                    .collect(MoreCollectors.toImmutableList());
 
-            ImmutableList<List<String>> collections = ImmutableList.copyOf(dimIds);
-            List<List<String>> combinations = Lists.cartesianProduct(collections);
+            List<List<String>> combinations = Lists.cartesianProduct(dimensions);
 
             // apply function and unroll.
-            return withValues(combinations.stream().map(mapper).flatMap(numbers -> {
-                System.out.println("Got " + numbers);
-                return numbers.stream();
-            }));
+            return withValues(combinations.stream().map(mapper).flatMap(Collection::stream));
         }
 
         public Builder addRow(ImmutableMap<String, ?> row) {

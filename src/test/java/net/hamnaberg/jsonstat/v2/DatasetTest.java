@@ -4,18 +4,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import net.hamnaberg.jsonstat.JsonStatModule;
+import org.assertj.core.util.Strings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.*;
+import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.cartesianProduct;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -28,7 +30,7 @@ public class DatasetTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        // TODO
+
         mapper.registerModule(new JsonStatModule());
         mapper.registerModule(new Jdk8Module().configureAbsentsAsNulls(true));
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -152,7 +154,7 @@ public class DatasetTest {
         builder.withDimension(Dimension.create("departure").withRole(Dimension.Roles.METRIC));
 
         // Supplier.
-        List<Number> collect = Lists.cartesianProduct(
+        List<Number> collect = cartesianProduct(
                 ImmutableList.of("2003", "2004", "2005"),
                 ImmutableList.of("may", "june", "july"),
                 ImmutableList.of("30", "31", "32"),
@@ -164,7 +166,6 @@ public class DatasetTest {
                         "T", "population 15 years old and over"
                 ).keySet().asList()
         ).stream().map(dimensions -> {
-            //System.out.println(dimensions + " -> " + dimensions.hashCode() );
             return dimensions.hashCode();
         }).collect(Collectors.toList());
 
@@ -175,6 +176,41 @@ public class DatasetTest {
         assertThat(build).isNotNull();
 
         //mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, builder.build());
+
+    }
+
+    @Test
+    public void testgetRows() throws Exception {
+
+        Dataset dataset = Dataset.create("test")
+                .withDimension(
+                        Dimension.create("A")
+                                .withCategories("A1", "A2", "A3"))
+                .withDimension(Dimension.create("B")
+                        .withCategories("B1", "B2"))
+                .withDimension(Dimension.create("C")
+                        .withCategories("C1", "C2", "C3", "C4")
+                ).withMapper(strings -> {
+                    return newArrayList(String.join("", strings).hashCode());
+                });
+
+        List<Object> result = StreamSupport.stream(dataset.getRows().spliterator(), false)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        assertThat(result).hasSize(24);
+
+        List<Integer> expected = Lists.transform(newArrayList(
+                "A1B1C1", "A1B1C2", "A1B1C3", "A1B1C4",
+                "A1B2C1", "A1B2C2", "A1B2C3", "A1B2C4",
+
+                "A2B1C1", "A2B1C2", "A2B1C3", "A2B1C4",
+                "A2B2C1", "A2B2C2", "A2B2C3", "A2B2C4",
+
+                "A3B1C1", "A3B1C2", "A3B1C3", "A3B1C4",
+                "A3B2C1", "A3B2C2", "A3B2C3", "A3B2C4"), String::hashCode);
+
+        assertThat(result).containsExactlyElementsOf(expected);
 
     }
 
@@ -208,14 +244,14 @@ public class DatasetTest {
 
 
         Dataset dataset = builder.withMapper(
-                dimensions -> Lists.newArrayList(
+                dimensions -> newArrayList(
                         dimensions.hashCode(),
                         dimensions.hashCode())
         );
 
         // Supplier.
-        List<Number> collect = Lists.cartesianProduct(
-                ImmutableList.of("2003", "2004", "2005"),
+        List<Number> collect = cartesianProduct(
+                ImmutableList.of("2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010"),
                 ImmutableList.of("may", "june", "july"),
                 ImmutableList.of("30", "31", "32"),
                 ImmutableMap.of(
@@ -226,11 +262,11 @@ public class DatasetTest {
                         "T", "population 15 years old and over"
                 ).keySet().asList()
         ).stream().map(dimensions -> {
-            System.out.println(dimensions + " -> " + dimensions.hashCode());
+            //System.out.println(dimensions + " -> " + dimensions.hashCode());
             return dimensions.hashCode();
         }).collect(Collectors.toList());
 
-        System.out.println(collect);
+        //System.out.println(collect);
 
         //builder.withValues(collect);
 

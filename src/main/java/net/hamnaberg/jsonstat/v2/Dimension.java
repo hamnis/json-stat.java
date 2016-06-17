@@ -5,12 +5,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import me.yanaga.guava.stream.MoreCollectors;
 import net.hamnaberg.jsonstat.JsonStat;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by hadrien on 07/06/16.
@@ -183,7 +183,7 @@ public class Dimension extends JsonStat {
         public Builder withCategories(ImmutableSet<String> categories) {
             Map<String, String> newIndexedLabels = categories.stream()
                     .collect(
-                            Collectors.toMap(
+                            MoreCollectors.toImmutableMap(
                                     Function.identity(),
                                     Function.identity()
                             )
@@ -199,7 +199,7 @@ public class Dimension extends JsonStat {
             final Integer[] size = {labels.build().size()};
             Map<String, String> newIndexedLabels = categories.stream()
                     .collect(
-                            Collectors.toMap(s ->
+                            MoreCollectors.toImmutableMap(s ->
                                             Integer.toString(size[0]++, 36),
                                     Function.identity()
                             )
