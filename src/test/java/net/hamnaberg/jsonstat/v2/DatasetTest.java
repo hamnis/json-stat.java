@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import net.hamnaberg.jsonstat.JsonStatModule;
-import org.assertj.core.util.Strings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
-import java.util.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -180,7 +182,7 @@ public class DatasetTest {
     }
 
     @Test
-    public void testgetRows() throws Exception {
+    public void testGetRows() throws Exception {
 
         Dataset dataset = Dataset.create("test")
                 .withDimension(
@@ -198,17 +200,17 @@ public class DatasetTest {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        assertThat(result).hasSize(24);
+        List<Integer> expected = Lists.transform(
+                newArrayList(
+                        "A1B1C1", "A1B1C2", "A1B1C3", "A1B1C4",
+                        "A1B2C1", "A1B2C2", "A1B2C3", "A1B2C4",
 
-        List<Integer> expected = Lists.transform(newArrayList(
-                "A1B1C1", "A1B1C2", "A1B1C3", "A1B1C4",
-                "A1B2C1", "A1B2C2", "A1B2C3", "A1B2C4",
+                        "A2B1C1", "A2B1C2", "A2B1C3", "A2B1C4",
+                        "A2B2C1", "A2B2C2", "A2B2C3", "A2B2C4",
 
-                "A2B1C1", "A2B1C2", "A2B1C3", "A2B1C4",
-                "A2B2C1", "A2B2C2", "A2B2C3", "A2B2C4",
-
-                "A3B1C1", "A3B1C2", "A3B1C3", "A3B1C4",
-                "A3B2C1", "A3B2C2", "A3B2C3", "A3B2C4"), String::hashCode);
+                        "A3B1C1", "A3B1C2", "A3B1C3", "A3B1C4",
+                        "A3B2C1", "A3B2C2", "A3B2C3", "A3B2C4"),
+                String::hashCode);
 
         assertThat(result).containsExactlyElementsOf(expected);
 
