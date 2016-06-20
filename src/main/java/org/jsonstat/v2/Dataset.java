@@ -1,8 +1,9 @@
-package org.jsonstat;
+package org.jsonstat.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.*;
 import me.yanaga.guava.stream.MoreCollectors;
+import org.jsonstat.JsonStat;
 
 import java.time.Instant;
 import java.util.*;

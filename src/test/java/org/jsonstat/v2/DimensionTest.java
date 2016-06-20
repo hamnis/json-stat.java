@@ -1,17 +1,16 @@
-package org.jsonstat;
+package org.jsonstat.v2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableMap;
+import org.jsonstat.JsonStatModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Created by hadrien on 07/06/16.
- */
+
 public class DimensionTest {
 
     private ObjectMapper mapper = new ObjectMapper();

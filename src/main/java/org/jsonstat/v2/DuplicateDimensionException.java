@@ -1,4 +1,4 @@
-package org.jsonstat;
+package org.jsonstat.v2;
 
 /**
  * Thrown when trying to add a dimension twice.

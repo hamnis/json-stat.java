@@ -1,4 +1,4 @@
-package org.jsonstat;
+package org.jsonstat.v2;
 
 /**
  * Created by hadrien on 15/06/16.

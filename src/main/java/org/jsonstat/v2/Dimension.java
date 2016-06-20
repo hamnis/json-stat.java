@@ -1,4 +1,4 @@
-package org.jsonstat;
+package org.jsonstat.v2;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import me.yanaga.guava.stream.MoreCollectors;
+import org.jsonstat.JsonStat;
 
 import java.util.Map;
 import java.util.Optional;

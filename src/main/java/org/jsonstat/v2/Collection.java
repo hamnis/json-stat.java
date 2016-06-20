@@ -1,4 +1,6 @@
-package org.jsonstat;
+package org.jsonstat.v2;
+
+import org.jsonstat.JsonStat;
 
 /**
  * Created by hadrien on 07/06/16.

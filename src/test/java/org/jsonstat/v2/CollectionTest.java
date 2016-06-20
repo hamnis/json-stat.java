@@ -1,4 +1,4 @@
-package org.jsonstat;
+package org.jsonstat.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
