@@ -228,10 +228,11 @@ public class Dataset extends JsonStat {
             checkNotNull(dimension, "the dimension builder was null");
 
 
-            //if (dimensionBuilders.contains(dimension))
-            //    throw new DuplicateDimensionException(
-            //           String.format("the builder already contains the dimension %s", dimension.toString())
-            //    );
+            if (dimensionBuilders.build().contains(dimension))
+                throw new DuplicateDimensionException(
+                       String.format("the builder already contains the dimension %s", dimension.toString())
+                );
+
             dimensionBuilders.add(dimension);
             return this;
         }

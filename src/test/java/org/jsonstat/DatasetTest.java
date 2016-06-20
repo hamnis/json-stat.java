@@ -24,9 +24,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-/**
- * Created by hadrien on 07/06/16.
- */
 public class DatasetTest {
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -46,7 +43,7 @@ public class DatasetTest {
     )
     public void testInvalidSize() throws Exception {
 
-        Dataset dataset = new Dataset(ImmutableSet.of(
+        new Dataset(ImmutableSet.of(
                 "a", "b", "c"
         ), ImmutableList.of(
                 1, 2, 3, 4
@@ -54,12 +51,12 @@ public class DatasetTest {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void testNeedAtLeastOneDimension() throws Exception {
         fail("TODO");
     }
 
-    @Test
+    @Test(enabled = false)
     public void testNeedAtLeastOneMetric() throws Exception {
         fail("TODO");
     }
@@ -67,7 +64,7 @@ public class DatasetTest {
     @Test()
     public void testConstructor() throws Exception {
 
-        Dataset dataset = new Dataset(ImmutableSet.of(
+        new Dataset(ImmutableSet.of(
                 "a", "b", "c"
         ), ImmutableList.of(
                 1, 2, 3
@@ -150,7 +147,7 @@ public class DatasetTest {
         // TODO: addDimension("name") returning Dimension.Builder? Super fluent?
         // TODO: How to ensure valid data with the geo builder? Add the type first and extend builders?
         // TODO: express hierarchy with the builder? Check how ES did that with the query builders.
-        //builder.withDimension(Dimension.create("location")
+        // example: builder.withDimension(Dimension.create("location")
         //        .withGeoRole());
 
         builder.withDimension(Dimension.create("arrival").withMetricRole());
@@ -168,17 +165,11 @@ public class DatasetTest {
                         "I", "inactive population",
                         "T", "population 15 years old and over"
                 ).keySet().asList()
-        ).stream().map(dimensions -> {
-            return dimensions.hashCode();
-        }).collect(Collectors.toList());
-
-        //System.out.println(collect);
+        ).stream().map(dimensions -> dimensions.hashCode()).collect(Collectors.toList());
 
         Dataset build = builder.withValues(collect);
 
         assertThat(build).isNotNull();
-
-        //mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, builder.build());
 
     }
 
@@ -302,26 +293,20 @@ public class DatasetTest {
                         "I", "inactive population",
                         "T", "population 15 years old and over"
                 ).keySet().asList()
-        ).stream().map(dimensions -> {
-            //System.out.println(dimensions + " -> " + dimensions.hashCode());
-            return dimensions.hashCode();
-        }).collect(Collectors.toList());
+        ).stream().map(List::hashCode).collect(Collectors.toList());
 
-        //System.out.println(collect);
+        String value = mapper.writeValueAsString(dataset);
 
-        //builder.withValues(collect);
-
-        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, dataset);
-
+        assertThat(value).isNotNull();
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void testLessMetricsInTheMapper() throws Exception {
         fail("TODO");
     }
 
-    @Test
+    @Test(enabled = false)
     public void testNullsInValuesIsOk() throws Exception {
         fail("TODO");
     }
@@ -337,11 +322,13 @@ public class DatasetTest {
                 1, 1
         ));
 
-        mapper.writeValue(System.out, dataset);
+        String value = mapper.writeValueAsString(dataset);
+
+        assertThat(value).isNotNull();
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDeserialize() throws Exception {
 
     }

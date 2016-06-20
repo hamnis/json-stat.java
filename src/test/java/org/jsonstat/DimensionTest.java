@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Created by hadrien on 07/06/16.
  */
@@ -31,11 +33,13 @@ public class DimensionTest {
                         "test2", "test label2"
                 )).build();
 
-        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, dimension);
+        String value = mapper.writeValueAsString(dimension);
+
+        assertThat(value).isNotNull();
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDeserialize() throws Exception {
 
     }
