@@ -13,8 +13,8 @@ Add json stat dependency into your project
 
 ````java
 <dependency>
-            <groupId>org.json-stat</groupId>
-            <artifactId>json-stat-jackson</artifactId>
+            <groupId>org.jsonstat</groupId>
+            <artifactId>json-stat</artifactId>
             <version>LATEST</version>
 </dependency>
 ````
