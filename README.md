@@ -13,9 +13,9 @@ Add json stat dependency into your project
 
 ````java
 <dependency>
-            <groupId>org.jsonstat</groupId>
+            <groupId>no.ssb</groupId>
             <artifactId>json-stat</artifactId>
-            <version>LATEST</version>
+            <version>0.1.0</version>
 </dependency>
 ````
 
