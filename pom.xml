@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.ssb</groupId>
-    <artifactId>json-stat</artifactId>
+    <artifactId>json-stat-java</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>
 
